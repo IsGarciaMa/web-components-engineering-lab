@@ -1,0 +1,45 @@
+---
+title: Laboratorio 00 · Dos contadores
+description: Compara un Web Component nativo y uno con Lit usando el mismo contrato y observando eventos reales.
+tableOfContents: false
+---
+
+import CounterLab from '../../../components/labs/counter-lab.astro';
+
+[← Todos los laboratorios](/laboratorios/)
+
+<p class="page-lead">
+  Dos formas de expresar el mismo comportamiento. Incrementa, observa y
+  contrasta el código. Este laboratorio pertenece a la experiencia inicial de
+  PR-00.
+</p>
+
+<CounterLab />
+
+## Qué estás observando
+
+El navegador registra ambos elementos como Custom Elements y permite que cada uno tenga su Shadow DOM. El contador nativo crea nodos una vez y actualiza sus valores. Lit declara un template y programa su actualización cuando cambia una propiedad reactiva.
+
+Los dos exponen `count` y emiten `count-change` por una interacción que incrementa. El evento llega al consumidor con `detail: { count }`, `bubbles: true` y `composed: true`. En Lit el DOM puede seguir pendiente cuando se recibe el evento: lee el valor del payload, y usa `updateComplete` cuando necesites comprobar el rendering.
+
+## Experimento guiado
+
+1. Pulsa **Incrementar** en el nativo. Observa `count: 1` en el registro.
+2. Pulsa dos veces en Lit. Su estado será `2`; el nativo conservará `1`.
+3. Enfoca cada botón y usa Enter y Espacio. El contrato debe mantenerse.
+4. Limpia el registro: los valores visuales deben conservarse.
+5. Expande el código y localiza dónde se convierte el atributo y dónde se emite el evento.
+
+[Leer el contrato y sus límites →](/guias/contador/)
+
+## Ejercicio relacionado
+
+[Añade una acción para restablecer el contador](/ejercicios/contador/). Trabaja en local y comprueba las dos implementaciones con el mismo contrato observable.
+
+## Referencias
+
+- [WHATWG: Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html)
+- [DOM: eventos](https://dom.spec.whatwg.org/)
+- [Lit: eventos y actualizaciones](https://lit.dev/docs/components/events/)
+
+[Siguiente: resolver el ejercicio →](/ejercicios/contador/) · [Ver la presentación de PR-00](/slides/foundation.html)

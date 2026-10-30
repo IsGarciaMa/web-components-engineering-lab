@@ -1,0 +1,23 @@
+<div class="example-grid">
+  <section class="example-card" aria-labelledby="native-title">
+    <h3 id="native-title">Web Component nativo</h3>
+    <p>DOM y ciclo de vida explícitos.</p>
+    <lab-native-counter count="0"></lab-native-counter>
+  </section>
+  <section class="example-card" aria-labelledby="lit-title">
+    <h3 id="lit-title">Web Component con Lit</h3>
+    <p>Templates y actualizaciones reactivas.</p>
+    <lab-lit-counter count="0"></lab-lit-counter>
+  </section>
+</div>
+<noscript
+  ><p>
+    Activa JavaScript para probar los contadores. El contrato y el código siguen
+    disponibles para lectura.
+  </p></noscript
+>
+
+<script>
+  import '../examples/native/native-counter';
+  import '../examples/lit/lit-counter';
+</script>

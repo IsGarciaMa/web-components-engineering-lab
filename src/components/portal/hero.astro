@@ -1,0 +1,123 @@
+---
+import DefaultHero from '@astrojs/starlight/components/Hero.astro';
+import AcademyNav from './academy-nav.astro';
+const isHome = Astro.url.pathname === '/';
+---
+
+{
+  isHome ? (
+    <div class="academy-home not-content">
+      <AcademyNav />
+      <div class="academy-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <span class="signal-dot" aria-hidden="true" /> ABIERTO. PRÁCTICO.
+            BASADO EN ESTÁNDARES.
+          </p>
+          <h1 id="_top">
+            Aprende la web.
+            <>
+              <br />
+              <span>Construye con criterio.</span>
+            </>
+          </h1>
+          <p class="hero-description">
+            Entiende Web Components desde el navegador y da el siguiente paso
+            con Lit. Un laboratorio de ingeniería para leer, experimentar y
+            comprobar lo que aprendes.
+          </p>
+          <div class="hero-actions">
+            <a class="lab-button primary" href="/ruta/">
+              Explorar la ruta <span aria-hidden="true">↗</span>
+            </a>
+            <a class="lab-button secondary" href="/laboratorios/">
+              Entrar al laboratorio <span aria-hidden="true">→</span>
+            </a>
+          </div>
+          <p class="hero-note">En español · Sin registro · A tu ritmo</p>
+        </div>
+        <div
+          class="hero-workbench"
+          aria-label="Vista del enfoque del laboratorio"
+        >
+          <div class="workbench-bar">
+            <>
+              <span aria-hidden="true">● ● ●</span>
+              <span>counter.ts</span>
+              <span class="mono">LAB / 00</span>
+            </>
+          </div>
+          <div class="workbench-code">
+            <>
+              <span class="code-muted">// Una API. Dos implementaciones.</span>
+              <br />
+              <span class="code-purple">class</span>
+            </>{' '}
+            <span class="code-mint">Counter</span>{' '}
+            <span class="code-purple">extends</span> HTMLElement {'{'}
+            <br />{' '}
+            <>
+              <span class="code-muted">
+                // El navegador es el punto de partida.
+              </span>
+              <br />
+            </>{' '}
+            <span class="code-mint">count</span> ={' '}
+            <span class="code-orange">0</span>;<br />
+            {'}'}
+            <br />
+            <>
+              <br />
+              <span class="code-muted">
+                // Después, compara con LitElement.
+              </span>
+            </>
+          </div>
+          <div class="workbench-result">
+            <>
+              <span class="result-symbol" aria-hidden="true">
+                +
+              </span>
+              <div>
+                <>
+                  <strong>Del estándar a la abstracción</strong>
+                  <p>Observa el mismo contrato con DOM nativo y Lit.</p>
+                </>
+              </div>
+              <span class="result-arrow" aria-hidden="true">
+                ↗
+              </span>
+            </>
+          </div>
+          <div class="workbench-footer">
+            <>
+              <span>Custom Elements</span>
+              <span>Shadow DOM</span>
+              <span>Lit</span>
+            </>
+          </div>
+        </div>
+      </div>
+      <div class="academy-facts">
+        <>
+          <span>
+            <strong>11</strong> capítulos en la ruta
+          </span>
+          <span>
+            <strong>2</strong> implementaciones comparables
+          </span>
+          <span>
+            <strong>100%</strong> contenido original
+          </span>
+          <span>
+            <strong>MIT</strong> código abierto
+          </span>
+        </>
+      </div>
+    </div>
+  ) : (
+    <DefaultHero>
+      <slot />
+    </DefaultHero>
+  )
+}

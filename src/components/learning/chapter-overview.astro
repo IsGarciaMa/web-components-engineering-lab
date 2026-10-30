@@ -1,0 +1,86 @@
+---
+import { chapters, statusLabels } from '../../data/curriculum';
+interface Props {
+  slug: string;
+}
+const chapterIndex = chapters.findIndex(
+  (chapter) => chapter.slug === Astro.props.slug,
+);
+const chapter = chapters[chapterIndex];
+if (!chapter) throw new Error(`Capítulo desconocido: ${Astro.props.slug}`);
+const next = chapters[chapterIndex + 1];
+---
+
+<div class="not-content chapter-overview">
+  <a class="text-link" href="/ruta/">← Volver a la ruta de aprendizaje</a>
+  <p class="eyebrow">{chapter.stage} · PR-{chapter.slug.slice(0, 2)}</p>
+  <span class="editorial-badge" data-status={chapter.status}
+    >{statusLabels[chapter.status]}</span
+  >
+  <p class="page-lead">{chapter.description}</p>
+  <aside class="editorial-note">
+    <strong>Este capítulo todavía no está publicado.</strong><p>
+      Los objetivos definen su alcance futuro. La experiencia inicial de PR-00
+      está disponible como material de orientación y no completa este capítulo.
+    </p>
+  </aside>
+  <nav class="chapter-index" aria-label="En esta planificación">
+    <a href="#objetivos">Objetivos</a>
+    <a href="#lecciones">Lecciones</a>
+    <a href="#documentacion">Documentación</a>
+    <a href="#practica">Laboratorios</a>
+    <a href="#ejercicios">Ejercicios</a>
+    <a href="#presentaciones">Presentaciones</a>
+    <a href="#referencias">Referencias</a>
+  </nav>
+  <h2 id="objetivos">Objetivos de aprendizaje</h2><ul>
+    {chapter.objectives.map((objective) => <li>{objective}</li>)}
+  </ul>
+  <h2 id="lecciones">Índice de lecciones</h2><p>
+    Planificación editorial pendiente para PR-{chapter.slug.slice(0, 2)}. No hay
+    lecciones publicadas de este capítulo.
+  </p>
+  <h2 id="documentacion">Documentación</h2><p>
+    La explicación del capítulo se incorporará en su entrega. Puedes
+    familiarizarte con el formato leyendo <a href="/guias/contador/"
+      >Un contrato, dos contadores</a
+    >.
+  </p>
+  <h2 id="practica">Ejemplos y laboratorios</h2><p>
+    Los ejemplos específicos están pendientes. El <a
+      href="/laboratorios/contador/">laboratorio inicial nativo y Lit</a
+    > ya permite comparar implementaciones y observar eventos.
+  </p>
+  <div class="resource-grid">
+    <section>
+      <h2 id="ejercicios">Ejercicios</h2><p>
+        Ejercicios del capítulo pendientes.
+      </p><a href="/ejercicios/contador/"
+        >Practicar con el ejercicio inicial →</a
+      >
+    </section><section>
+      <h2 id="presentaciones">Presentaciones</h2><p>
+        Presentación del capítulo pendiente.
+      </p><a href="/slides/foundation.html">Ver la presentación de PR-00 →</a>
+    </section>
+  </div>
+  <h2 id="referencias">Referencias para orientarte</h2><ul>
+    <li>
+      <a href="https://html.spec.whatwg.org/multipage/custom-elements.html"
+        >WHATWG: Custom Elements</a
+      > · estándar de la plataforma.
+    </li><li>
+      <a href="https://lit.dev/docs/">Documentación oficial de Lit</a> · biblioteca
+      sobre los estándares.
+    </li>
+  </ul>
+  <nav class="next-content" aria-label="Siguiente contenido">
+    <a href="/guias/contador/">Leer la lección disponible →</a>{
+      next && (
+        <a href={`/capitulos/${next.slug}/`}>
+          Siguiente en la ruta: {next.title} (pendiente) →
+        </a>
+      )
+    }
+  </nav>
+</div>

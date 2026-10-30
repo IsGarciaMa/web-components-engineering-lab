@@ -1,0 +1,150 @@
+---
+import { chapters } from '../../data/curriculum';
+---
+
+<div class="academy-home not-content">
+  <section class="academy-section" aria-labelledby="approach-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">APRENDER HACIENDO, CON FUNDAMENTO</p><h2
+          id="approach-title"
+        >
+          Menos magia. Más comprensión.
+        </h2>
+      </div><p>
+        Primero entiende la plataforma.<br />Después, decide qué construir sobre
+        ella.
+      </p>
+    </div>
+    <div class="feature-grid">
+      <article class="feature-card">
+        <span class="feature-icon" aria-hidden="true">&lt;/&gt;</span><h3>
+          El navegador primero
+        </h3><p>
+          Custom Elements da identidad a tus etiquetas. Shadow DOM delimita su
+          árbol y sus estilos. Los slots permiten componer contenido.
+        </p><a href="/ruta/"
+          >Conocer los estándares <span aria-hidden="true">→</span></a
+        >
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon purple" aria-hidden="true">◇</span><h3>
+          Lit con contexto
+        </h3><p>
+          Lit añade templates declarativos y actualizaciones reactivas a los Web
+          Components. Compara qué simplifica y qué conserva del estándar.
+        </p><a href="/guias/contador/"
+          >Comparar implementaciones <span aria-hidden="true">→</span></a
+        >
+      </article>
+      <article class="feature-card">
+        <span class="feature-icon orange" aria-hidden="true">✓</span><h3>
+          Decisiones verificables
+        </h3><p>
+          Practica con contratos públicos, eventos, teclado y pruebas. Explica
+          por qué funciona tu componente, además de hacerlo funcionar.
+        </p><a href="/ejercicios/contador/"
+          >Resolver el primer ejercicio <span aria-hidden="true">→</span></a
+        >
+      </article>
+    </div>
+  </section>
+  <section class="academy-section" aria-labelledby="path-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">UN RECORRIDO CON DIRECCIÓN</p><h2 id="path-title">
+          De la plataforma a producción.
+        </h2>
+      </div><a class="text-link" href="/ruta/"
+        >Ver los 11 capítulos <span aria-hidden="true">→</span></a
+      >
+    </div>
+    <div class="path-preview">
+      {
+        [
+          {
+            number: '01—07',
+            title: 'Estándares web',
+            text: 'Elementos, contratos, encapsulación, composición y formularios.',
+            count: chapters.filter((c) => c.stage === 'Estándares web').length,
+          },
+          {
+            number: '08—10',
+            title: 'Ingeniería con Lit',
+            text: 'Templates, reactividad y herramientas de composición.',
+            count: chapters.filter((c) => c.stage === 'Ingeniería con Lit')
+              .length,
+          },
+          {
+            number: '11',
+            title: 'Calidad y entrega',
+            text: 'Accesibilidad, pruebas y decisiones para producción.',
+            count: 1,
+          },
+        ].map((stage) => (
+          <article>
+            <>
+              <span class="mono stage-number">{stage.number}</span>
+              <h3>{stage.title}</h3>
+              <p>{stage.text}</p>
+              <span class="editorial-badge" data-status="pending">
+                {stage.count} capítulos · Pendientes
+              </span>
+            </>
+          </article>
+        ))
+      }
+    </div>
+    <p class="section-note">
+      La ruta se publicará progresivamente. Ya puedes recorrer la experiencia
+      inicial y probar el laboratorio de contadores.
+    </p>
+  </section>
+  <section class="featured-lab" aria-labelledby="featured-title">
+    <div>
+      <p class="eyebrow">DISPONIBLE AHORA · LAB 00</p><h2 id="featured-title">
+        Un contrato, dos contadores.
+      </h2><p>
+        Una interacción pequeña abre preguntas grandes. Compara DOM nativo y
+        Lit, inspecciona el código y observa cada evento.
+      </p><a class="lab-button primary" href="/laboratorios/contador/"
+        >Abrir el laboratorio <span aria-hidden="true">→</span></a
+      >
+    </div><div class="lab-comparison" aria-hidden="true">
+      <div><span>NATIVO</span><strong>count = 0</strong></div><span>⇄</span><div
+      >
+        <span>LIT</span><strong>count = 0</strong>
+      </div>
+    </div>
+  </section>
+  <section class="academy-section" aria-labelledby="method-title">
+    <p class="eyebrow">LA METODOLOGÍA</p><h2 id="method-title">
+      Un ciclo que puedes repetir.
+    </h2><ol class="method-grid">
+      <li>
+        <span class="mono">01 /</span><h3>Comprende</h3><p>
+          Lee la explicación y consulta las fuentes oficiales.
+        </p>
+      </li><li>
+        <span class="mono">02 /</span><h3>Experimenta</h3><p>
+          Prueba el comportamiento y compara las implementaciones.
+        </p>
+      </li><li>
+        <span class="mono">03 /</span><h3>Construye</h3><p>
+          Resuelve un ejercicio local con criterios observables.
+        </p>
+      </li><li>
+        <span class="mono">04 /</span><h3>Verifica</h3><p>
+          Comprueba el contrato y razona sobre sus límites.
+        </p>
+      </li>
+    </ol>
+  </section>
+  <footer class="academy-footer">
+    <p>
+      Web Components Engineering Lab <span
+        >· Un espacio para entender cómo funciona la web.</span
+      >
+    </p><a href="/guias/inicio/">Acerca del proyecto →</a>
+  </footer>
+</div>

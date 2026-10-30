@@ -1,0 +1,96 @@
+---
+title: Un contrato, dos contadores
+description: Primera prueba de arquitectura con Custom Elements nativos y Lit.
+---
+
+import CounterDemo from '../../../components/CounterDemo.astro';
+import LearningProgress from '../../../components/progress/learning-progress.astro';
+
+[← Ruta de aprendizaje](/ruta/) · **Disponible · Lección inicial de PR-00**
+
+Al terminar podrás comparar el contrato de los dos componentes, interpretar un evento y explicar cuándo esperar una actualización de Lit. Necesitas HTML y JavaScript básicos.
+
+[Abrir el laboratorio con código y registro de eventos →](/laboratorios/contador/)
+
+## Objetivo
+
+Comprobar cómo la misma API pública se implementa con el estándar Custom Elements y con LitElement. Un contador mantiene un número y permite incrementarlo: es suficiente para observar atributos, propiedades, rendering y eventos.
+
+<CounterDemo />
+
+## Uso
+
+```html
+<lab-native-counter count="2"></lab-native-counter>
+<lab-lit-counter count="2"></lab-lit-counter>
+```
+
+Los módulos se importan desde un `<script>` de Astro. Su registro se ejecuta en el navegador, sin evaluar `HTMLElement` en el servidor. No requieren directivas de hidratación de un framework.
+
+```ts
+const counter = document.querySelector('lab-native-counter');
+if (counter) {
+  counter.count = 5;
+  counter.addEventListener('count-change', (event) => {
+    console.log((event as CustomEvent<{ count: number }>).detail.count);
+  });
+}
+```
+
+## Atributos y propiedades
+
+| Contrato                          | Nativo                                          | Lit                                  |
+| --------------------------------- | ----------------------------------------------- | ------------------------------------ |
+| `count` como atributo             | Cadena convertida en `attributeChangedCallback` | Conversor de propiedad reactiva      |
+| `count` como propiedad            | Accesor numérico explícito                      | Accesor decorado con `@property`     |
+| Rendering                         | Síncrono, actualiza nodos propios               | Asíncrono, espera `updateComplete`   |
+| Reflexión de propiedad a atributo | Explícita y síncrona                            | `reflect: true`, en la actualización |
+| Notificación de interacción       | `CustomEvent`                                   | El mismo `CustomEvent` nativo        |
+
+El valor público siempre es un entero seguro: las fracciones se truncan, los valores no finitos o no numéricos se convierten en cero y los extremos se limitan al rango seguro de JavaScript. Quitar el atributo restablece cero. En Lit, un atributo externo puede conservar su texto original hasta una reflexión posterior: no se promete canonicalizar el texto del atributo recibido.
+
+El botón se desactiva en `Number.MAX_SAFE_INTEGER`. Un cambio programático no emite eventos. Una interacción que incrementa sí emite `count-change` con `detail: { count }`, `bubbles: true` y `composed: true`. El consumidor debe leer el valor del evento; el DOM de Lit puede seguir pendiente en ese momento.
+
+## Cómo funciona
+
+La versión nativa crea Shadow DOM y nodos una vez en el constructor. Cambia solo el texto y el estado del botón. Su listener pertenece al botón interno; reconectar el elemento no lo duplica. Recupera propiedades asignadas antes del registro del Custom Element.
+
+Lit conserva Custom Elements y Shadow DOM. Añade templates declarativos, bindings y planificación de actualizaciones. El binding `@click` registra un listener, `?disabled` controla un atributo booleano y la interpolación de texto escapa el contenido. `render()` no cambia el estado ni modifica el DOM manualmente.
+
+Los decorators experimentales usados aquí requieren `experimentalDecorators: true` y `useDefineForClassFields: false`. No mezcles esta configuración con auto-accessors de decorators estándar sin revisar el compilador.
+
+## Cuándo elegir cada opción
+
+La versión nativa permite estudiar el estándar y sirve para elementos pequeños con pocos cambios visuales. El mantenimiento manual del DOM crece al añadir estados y ramas. Lit resulta útil cuando los templates y el estado evolucionan; añade una dependencia y un ciclo asíncrono que debe entenderse. Evita usar cualquiera de las dos si HTML nativo ya resuelve el problema sin comportamiento adicional.
+
+## Accesibilidad y límites
+
+Se usa un botón HTML con teclado, foco visible y área mínima de 44 px. Un `output` con nombre y región viva comunica el valor. Shadow DOM no garantiza accesibilidad: siguen siendo necesarias comprobaciones con teclado y lector de pantalla. Este ejemplo no introduce formularios, persistencia ni gestión global del estado.
+
+## Errores frecuentes
+
+- Confundir la cadena de un atributo con el número de una propiedad.
+- Esperar el rendering de Lit inmediatamente después de asignar una propiedad.
+- Emitir eventos por cada asignación del consumidor y crear bucles.
+- Sobrescribir nodos de Lit desde `updated()`.
+- Añadir listeners globales en cada conexión sin retirarlos.
+
+## Ejercicio y entrevista
+
+Añade un botón para restablecer el contador siguiendo [el ejercicio guiado](/ejercicios/contador/). ¿Por qué `composed` y `bubbles` resuelven problemas diferentes? ¿Qué cambia si el elemento se define después de asignar su propiedad? ¿Cuándo necesitas `updateComplete`?
+
+## Referencias
+
+- [Custom Elements en WHATWG](https://html.spec.whatwg.org/multipage/custom-elements.html)
+- [Eventos y Shadow DOM](https://dom.spec.whatwg.org/)
+- [Propiedades reactivas en Lit](https://lit.dev/docs/components/properties/)
+- [Eventos en Lit](https://lit.dev/docs/components/events/)
+- [Decorators en Lit](https://lit.dev/docs/components/decorators/)
+
+## Cierra el recorrido
+
+Comprueba el contrato en [el laboratorio](/laboratorios/contador/), resuelve [el ejercicio](/ejercicios/contador/) y repasa [la presentación](/slides/foundation.html). Marcar la lección es una autoevaluación, no una certificación.
+
+<LearningProgress lesson />
+
+[Siguiente: practicar en el laboratorio →](/laboratorios/contador/)

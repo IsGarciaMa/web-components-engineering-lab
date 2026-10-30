@@ -1,0 +1,58 @@
+---
+import { Code } from '@astrojs/starlight/components';
+import CounterDemo from '../CounterDemo.astro';
+import nativeSource from '../../examples/native/native-counter.ts?raw';
+import litSource from '../../examples/lit/lit-counter.ts?raw';
+import contractSource from '../../examples/shared/counter-contract.ts?raw';
+---
+
+<lab-counter-lab class="not-content">
+  <section class="lab-preview" aria-labelledby="preview-title">
+    <div class="lab-panel-heading">
+      <h2 id="preview-title">Vista funcional</h2><span
+        class="editorial-badge"
+        data-status="available">Interactivo</span
+      >
+    </div><p>
+      Incrementa cada contador. Comparten contrato público, pero mantienen su
+      propio estado.
+    </p><CounterDemo />
+  </section>
+  <section class="lab-event-panel" aria-labelledby="events-title">
+    <div class="lab-panel-heading">
+      <h2 id="events-title">Registro de eventos</h2><button
+        type="button"
+        data-clear-events>Limpiar registro</button
+      >
+    </div><p data-event-summary role="status">
+      Todavía no hay eventos. Pulsa Incrementar en cualquiera de los contadores.
+    </p><ol data-event-log aria-label="Últimos ocho eventos"></ol><p
+      class="section-note"
+    >
+      Se muestran como máximo ocho eventos. Limpiar el registro conserva el
+      valor de los contadores.
+    </p>
+  </section>
+  <section class="lab-source" aria-labelledby="source-title">
+    <h2 id="source-title">Código fuente</h2><p>
+      Los archivos se importan directamente del ejemplo ejecutable. Expande una
+      implementación para inspeccionarla.
+    </p><details>
+      <summary>Implementación nativa · native-counter.ts</summary><Code
+        code={nativeSource}
+        lang="ts"
+      />
+    </details><details>
+      <summary>Implementación Lit · lit-counter.ts</summary><Code
+        code={litSource}
+        lang="ts"
+      />
+    </details><details>
+      <summary>Contrato y estilos compartidos · counter-contract.ts</summary
+      ><Code code={contractSource} lang="ts" />
+    </details>
+  </section>
+</lab-counter-lab>
+<script>
+  import '../../labs/counter-lab';
+</script>

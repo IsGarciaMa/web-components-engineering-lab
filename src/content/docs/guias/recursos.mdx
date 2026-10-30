@@ -1,0 +1,26 @@
+---
+title: Recursos de aprendizaje
+description: Diagramas, presentaciones y ejercicios preparados para ampliar el laboratorio.
+---
+
+import Diagram from '../../../components/Diagram.astro';
+import foundation from '../../../../diagrams/foundation.mmd?raw';
+
+## Arquitectura en un diagrama
+
+<Diagram
+  source={foundation}
+  caption="El contenido genera un sitio estático; los ejemplos se ejecutan en el navegador."
+/>
+
+El archivo fuente vive en `diagrams/foundation.mmd`. El diagrama incluye título y descripción accesibles. Si JavaScript está desactivado, su definición textual sigue disponible.
+
+## Presentaciones
+
+[Ver la presentación de la infraestructura](/slides/foundation.html).
+
+`pnpm slides:build` transforma `presentations/*.md` en HTML estático. `pnpm build` incluye este paso antes de generar el portal. La salida se ignora en Git. No hace falta Chromium para exportar HTML; PDF y capturas requieren un navegador adicional.
+
+## Ejercicios
+
+Puedes [resolver el ejercicio inicial en la academia](/ejercicios/contador/). En el repositorio, el primer enunciado está en `exercises/00-counter.md` y su solución razonada en `exercises/solutions/00-counter.md`. Los capítulos futuros añadirán ejercicios propios junto con sus criterios observables de aceptación. No hay más ejercicios publicados todavía.

@@ -1,0 +1,22 @@
+---
+interface Props {
+  source: string;
+  caption: string;
+}
+const { source, caption } = Astro.props;
+---
+
+<figure>
+  <pre class="mermaid diagram">{source}</pre>
+  <figcaption>{caption}</figcaption>
+</figure>
+<script>
+  import mermaid from 'mermaid';
+
+  mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: 'strict',
+    theme: 'neutral',
+  });
+  await mermaid.run({ querySelector: '.mermaid' });
+</script>

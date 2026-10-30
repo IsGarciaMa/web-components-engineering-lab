@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.astro/
+.cache/
+.vercel/
+playwright-report/
+test-results/
+coverage/
+public/slides/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.log
+*.tsbuildinfo
+.aws/

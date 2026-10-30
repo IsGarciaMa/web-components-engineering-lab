@@ -1,0 +1,9 @@
+flowchart TD
+  accTitle: Arquitectura del laboratorio
+  accDescr: El contenido MDX combina componentes Astro y ejemplos web. Astro genera HTML estático que se valida en CI.
+  MDX[Contenido Markdown y MDX] --> Astro[Astro y Starlight]
+  Native[Ejemplos nativos] --> Browser[Navegador]
+  Lit[Ejemplos Lit] --> Browser
+  Astro --> Static[HTML estático y búsqueda Pagefind]
+  Static --> Browser
+  CI[CI: tipos, contratos y E2E] --> Static

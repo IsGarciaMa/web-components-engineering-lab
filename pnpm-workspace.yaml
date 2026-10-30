@@ -1,0 +1,7 @@
+packages:
+  - .
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
+  - '@astrojs/compiler-rs'
+  - unrs-resolver

@@ -1,0 +1,21 @@
+---
+const items = [
+  { href: '/', label: 'Academia' },
+  { href: '/ruta/', label: 'Ruta de aprendizaje' },
+  { href: '/laboratorios/', label: 'Laboratorios' },
+  { href: '/guias/recursos/', label: 'Recursos' },
+];
+---
+
+<nav class="academy-nav not-content" aria-label="Academia">
+  {
+    items.map(({ href, label }) => (
+      <a
+        href={href}
+        aria-current={Astro.url.pathname === href ? 'page' : undefined}
+      >
+        {label}
+      </a>
+    ))
+  }
+</nav>
