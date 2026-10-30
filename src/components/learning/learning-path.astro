@@ -1,0 +1,69 @@
+---
+import { chapters, statusLabels } from '../../data/curriculum';
+import AcademyNav from '../portal/academy-nav.astro';
+import LearningProgress from '../progress/learning-progress.astro';
+---
+
+<AcademyNav />
+<div class="not-content">
+  <p class="page-lead">
+    Once capítulos, tres etapas y un mismo propósito: construir componentes que
+    puedas explicar y verificar. Este es el orden recomendado; el estado
+    editorial indica qué material está publicado.
+  </p>
+  <a class="foundation-card" href="/guias/contador/"
+    ><span class="chapter-number">00</span><div>
+      <span class="editorial-badge" data-status="available"
+        >Disponible · Experiencia inicial</span
+      ><h2>Empieza con un contrato, dos contadores</h2><p>
+        Lee la lección, explora el laboratorio y resuelve el ejercicio. No
+        requiere completar un capítulo.
+      </p>
+    </div><span aria-hidden="true">↗</span></a
+  >
+  <LearningProgress />
+  {
+    (
+      ['Estándares web', 'Ingeniería con Lit', 'Calidad y entrega'] as const
+    ).map((stage, index) => (
+      <section class="path-stage" aria-labelledby={`stage-${index}`}>
+        <>
+          <p class="eyebrow">ETAPA {index + 1}</p>
+          <h2 id={`stage-${index}`}>{stage}</h2>
+        </>
+        <ol
+          class="chapter-list"
+          start={chapters.findIndex((c) => c.stage === stage) + 1}
+        >
+          {chapters
+            .filter((c) => c.stage === stage)
+            .map((chapter) => (
+              <li class="chapter-card">
+                <span class="chapter-number" aria-hidden="true">
+                  {chapter.slug.slice(0, 2)}
+                </span>
+                <div>
+                  <span class="editorial-badge" data-status={chapter.status}>
+                    {statusLabels[chapter.status]}
+                  </span>
+                  <h3>
+                    <a href={`/capitulos/${chapter.slug}/`}>{chapter.title}</a>
+                  </h3>
+                  <p>{chapter.description}</p>
+                  <ul class="chapter-objectives">
+                    {chapter.objectives.map((objective) => (
+                      <li>{objective}</li>
+                    ))}
+                  </ul>
+                  <a class="text-link" href={`/capitulos/${chapter.slug}/`}>
+                    Ver objetivos y planificación{' '}
+                    <span aria-hidden="true">→</span>
+                  </a>
+                </div>
+              </li>
+            ))}
+        </ol>
+      </section>
+    ))
+  }
+</div>

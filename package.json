@@ -1,0 +1,49 @@
+{
+  "name": "web-components-engineering-lab",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24.22.1 <25",
+    "pnpm": "10.34.9"
+  },
+  "scripts": {
+    "dev": "node scripts/run-local-tool.mjs astro dev",
+    "preview": "node scripts/run-local-tool.mjs astro preview",
+    "build": "pnpm slides:build && node scripts/run-local-tool.mjs astro build",
+    "format": "node scripts/run-local-tool.mjs prettier --write .",
+    "format:check": "node scripts/run-local-tool.mjs prettier --check .",
+    "lint": "node scripts/run-local-tool.mjs eslint . --max-warnings 0",
+    "typecheck": "node scripts/run-local-tool.mjs astro check && node scripts/run-local-tool.mjs tsc --noEmit -p tsconfig.tools.json",
+    "test": "node scripts/run-local-tool.mjs vitest run",
+    "test:watch": "node scripts/run-local-tool.mjs vitest",
+    "test:e2e": "node scripts/run-local-tool.mjs playwright test",
+    "slides:build": "node scripts/run-local-tool.mjs marp --input-dir presentations --output public/slides",
+    "skills:check": "node scripts/validate-skills.mjs",
+    "check": "pnpm skills:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:tooling && pnpm test && pnpm build && pnpm test:e2e && git diff --check",
+    "test:tooling": "node --test tests/tooling/*.test.mjs"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.42.8",
+    "astro": "7.4.4",
+    "lit": "3.3.3",
+    "mermaid": "12.2.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@eslint/js": "9.39.3",
+    "@marp-team/marp-cli": "4.5.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.10.13",
+    "axe-core": "4.11.0",
+    "eslint": "9.39.5",
+    "eslint-plugin-astro": "1.5.0",
+    "jsdom": "26.1.0",
+    "prettier": "3.8.0",
+    "prettier-plugin-astro": "0.14.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.0",
+    "vitest": "4.0.18"
+  }
+}

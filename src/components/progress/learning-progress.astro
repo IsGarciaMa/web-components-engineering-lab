@@ -1,0 +1,19 @@
+---
+import { foundationLesson } from '../../data/curriculum';
+interface Props {
+  lesson?: boolean;
+}
+const { lesson = false } = Astro.props;
+---
+
+<lab-learning-progress lesson-id={lesson ? foundationLesson.id : undefined}
+></lab-learning-progress>
+<noscript
+  ><p>
+    El progreso local opcional requiere JavaScript. Puedes recorrer todo el
+    contenido sin activarlo.
+  </p></noscript
+>
+<script>
+  import './learning-progress';
+</script>

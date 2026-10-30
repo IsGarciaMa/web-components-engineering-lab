@@ -1,0 +1,45 @@
+---
+title: Ejercicio 00 · Restablecer el contador
+description: Extiende un contrato observable y verifica la equivalencia de las implementaciones nativa y Lit.
+---
+
+## Antes de empezar
+
+Lee [la lección inicial](/guias/contador/) y prueba [el laboratorio](/laboratorios/contador/). Necesitas poder ejecutar el proyecto en local y comprender la diferencia entre atributo y propiedad.
+
+## Enunciado
+
+Añade un botón **Restablecer** a ambos contadores. Una interacción debe poner `count` a cero y emitir exactamente un `count-change` solo si el valor cambia. Una asignación programática debe seguir siendo silenciosa.
+
+Trabaja en `src/examples/native/native-counter.ts` y `src/examples/lit/lit-counter.ts`. Los enunciados y soluciones del repositorio se conservan en `exercises/`.
+
+## Criterios de aceptación
+
+- Desde `count = 3`, Enter sobre Restablecer produce cero y un evento con `{ count: 0 }`.
+- El foco sigue en el botón. Repetir en cero no emite otro evento.
+- La propiedad y el atributo se reflejan según el ciclo de cada implementación.
+- Asignar `count` programáticamente conserva el contrato silencioso.
+- Desconectar y reconectar no duplica notificaciones.
+
+Escribe primero tus casos de comportamiento. Ejecuta `pnpm test`, `pnpm build` y `pnpm test:e2e` con las dependencias y navegadores instalados.
+
+## Pista
+
+El restablecimiento es una interacción. Puedes reutilizar la normalización y el emisor existentes, conservando las diferencias de rendering.
+
+<details>
+  <summary>Consultar la solución razonada</summary>
+
+En el elemento nativo, crea el botón una sola vez. En su listener captura el valor anterior, asigna `this.count = 0` y llama a `emitCountChange` únicamente si el valor cambia.
+
+En Lit, declara el botón en `render()` y enlaza `@click` a un método con la misma secuencia. Deja que el setter decorado programe la actualización. Espera `updateComplete` en las comprobaciones del DOM. Evita buscar o modificar el botón desde `updated()`.
+
+La condición sobre el valor anterior evita notificaciones al restablecer cero. El mismo test de contrato sirve para ambas implementaciones si respeta el momento de actualización.
+
+</details>
+
+## Reflexiona
+
+¿Por qué un cambio programático no tiene la misma semántica que la interacción? ¿Qué observaría un consumidor si emitieras antes de cambiar la propiedad?
+
+[Volver al laboratorio →](/laboratorios/contador/) · [Continuar hacia la ruta →](/ruta/)
