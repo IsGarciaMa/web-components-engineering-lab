@@ -34,14 +34,22 @@ pnpm build
 pnpm preview
 ```
 
-Antes de entregar, instala los navegadores en un sistema soportado y ejecuta todas las puertas:
+Durante el desarrollo usa pruebas relacionadas con el cambio. Los niveles agregados reutilizan los scripts existentes:
 
-```sh
-pnpm exec playwright install --with-deps chromium firefox webkit
-pnpm check
-```
+| Comando                           | Alcance                                                        |
+| --------------------------------- | -------------------------------------------------------------- |
+| `pnpm check:fast`                 | Prettier, ESLint, tipos, tooling y Vitest                      |
+| `pnpm check:build` o `pnpm check` | Rápidas una vez, build con Marp/Pagefind y referencias locales |
+| `pnpm check:e2e`                  | Playwright sobre un build vigente; solo en entorno compatible  |
+| `pnpm check:full`                 | Integración y navegador; solo en entorno compatible            |
 
-Los scripts exigen las herramientas locales y sus versiones exactas. `pnpm check` incluye Skills, Prettier, ESLint, tipos, tooling, Vitest, Marp, Astro, referencias locales/fragmentos, Playwright y diff. Los E2E generan capturas en `test-results/`, además de comprobar navegación, eventos, progreso, búsqueda, temas, accesibilidad automatizada y reflow.
+Al cerrar el capítulo ejecuta `check:build` una vez, sin repetir antes `check:fast`. Los cambios pequeños solo necesitan formato y pruebas relacionadas. `pnpm skills:check` se usa cuando cambian Skills o su catálogo, y siempre en CI.
+
+La CI separa calidad y navegador en Ubuntu 24.04. El job de navegador descarga el `dist` validado por calidad, instala los tres motores y ejecuta E2E sin repetir build. Conserva navegación, eventos, progreso, búsqueda, temas, accesibilidad, reflow y consola; sube reportes ante fallos y las capturas de referencia explícitas también al pasar.
+
+En un entorno compatible puedes filtrar, por ejemplo `pnpm check:e2e --project=chromium --grep "progreso"`. Monterey conserva su bloqueo conocido: no instales ni ejecutes los motores allí. No hace falta repetir ese diagnóstico ni instalar PyYAML para el validador auxiliar.
+
+Los scripts siguen exigiendo herramientas locales de las versiones fijadas. Las políticas de selección de pruebas y problemas conocidos viven en `AGENTS.md`; no se genera un informe de auditoría por cada tarea.
 
 ## Arquitectura
 

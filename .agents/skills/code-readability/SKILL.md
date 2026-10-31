@@ -5,13 +5,13 @@ description: 'Escribe y revisa TypeScript, Lit y ejemplos del laboratorio con bl
 
 # code-readability
 
-Mejora la comprensión del código que exige la tarea. Antes de editar, lee `AGENTS.md`, `prettier.config.mjs`, `eslint.config.mjs`, los tsconfig aplicables y el código cercano. Conserva contratos, orden de efectos y comportamiento; separa cualquier corrección funcional de una reorganización visual en la explicación y sus pruebas.
+Aplica estas convenciones mientras escribes el código de la tarea, como parte transversal de la implementación. No abras una auditoría adicional después de cada funcionalidad. Mejora la comprensión del código que exige la tarea. Consulta una vez `AGENTS.md`, las configuraciones aplicables y el código cercano; reutiliza ese contexto mientras no cambie. Conserva contratos, orden de efectos y comportamiento; separa cualquier corrección funcional de una reorganización visual en la explicación y sus pruebas.
 
 ## Responsabilidades y alcance
 
 - Prettier decide indentación, comillas, punto y coma, ancho de línea, comas finales, espaciado sintáctico y formato de TS/Astro/templates. No lo contradigas con alineaciones manuales, reglas de formato equivalentes ni `prettier-ignore` para imponer preferencias.
 - ESLint detecta patrones concretos; TypeScript comprueba contratos estáticos. Ninguno decide por sí solo dónde cambia la intención de un algoritmo.
-- Usa `frontend-architecture` para límites de módulos; `lit-engineering` para semántica reactiva y lifecycle; `code-review` para priorización y evidencia. Esta Skill aporta organización local y claridad, sin repetir sus procedimientos.
+- Usa `frontend-architecture` para límites de módulos y `lit-engineering` para semántica reactiva y lifecycle cuando sean pertinentes. Reserva `code-review` para cierre de PR, arquitectura importante, seguridad crítica o petición expresa. Esta Skill aporta organización local y claridad, sin repetir sus procedimientos.
 - Aplica las convenciones a código nuevo y a los bloques que necesitas modificar. No ejecutes un autofix global, reformatees el repositorio ni reorganices archivos ajenos para introducir la Skill. No crees helpers o capas por una cuota de tamaño.
 
 ## Bloques, imports y control de flujo
@@ -59,6 +59,6 @@ Consulta `docs/skills.md` para el estado de las reglas, no infieras que toda con
 
 Consulta [antes y después](references/examples.md) al generar ejemplos o revisar una reorganización: incluye guard clauses, agrupación, transformaciones, asincronía, handlers, Lit, lifecycle, imports, CSS y tests. Son alternativas con el contexto indicado, no instrucciones para reescribir esos módulos del proyecto.
 
-Revisa el diff buscando cambios de comportamiento, efectos reordenados y abstracciones innecesarias. Comprueba que los tests mantienen preparación, acción y observación claras; espera el ciclo real de Lit en lugar de esperas fijas y conserva las aserciones del contrato público.
+Durante el cambio, comprueba localmente que no alteras comportamiento ni reordenas efectos o añades abstracciones innecesarias. Comprueba que los tests mantienen preparación, acción y observación claras; espera el ciclo real de Lit en lugar de esperas fijas y conserva las aserciones del contrato público.
 
-Ejecuta Prettier, ESLint, tipos y pruebas afectadas; build si cambian configuración, imports, Astro o ejemplos publicados. Si modificas esta Skill o su catálogo, ejecuta `pnpm skills:check`. Respeta las puertas de entrega de `AGENTS.md` y comunica cada comprobación bloqueada. Leer un fichero o validar su estructura no demuestra reconocimiento automático en Codex ni ejecución de los ejemplos.
+Valida proporcionalmente según `AGENTS.md`: formato y pruebas relacionadas para cambios pequeños, lint/tipos cuando el cambio lo requiera y una sola ejecución de `check:build` al cerrar PR. No repitas resultados vigentes ni build por cada archivo. Si cambia esta Skill o su catálogo, usa `pnpm skills:check`; no reinstales ni investigues PyYAML para repetir el bloqueo conocido. Informa solo de bloqueos relevantes. Leer un fichero o validar su estructura no demuestra reconocimiento automático en Codex ni ejecución de los ejemplos.

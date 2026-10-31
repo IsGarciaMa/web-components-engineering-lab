@@ -2,7 +2,7 @@
 
 El catálogo del repositorio pasa de diez a **once Skills** con `code-readability`. Se mantiene una sola fuente en `.agents/skills/<nombre>/SKILL.md`, con frontmatter YAML `name` y `description`. No existe un directorio alternativo `codex-skills/` ni se duplican los cuerpos en `AGENTS.md`.
 
-Las diez originales estaban reconocidas en el catálogo de esta sesión. La nueva [code-readability](../.agents/skills/code-readability/SKILL.md) se lee explícitamente durante esta entrega. Su descubrimiento automático debe comprobarse cuando Codex actualice el catálogo de una sesión; crear el archivo y pasar el validador no acreditan ese reconocimiento.
+Las once Skills están instaladas, reconocidas y validadas según el estado confirmado del proyecto. La validación estructural sigue siendo distinta del reconocimiento en el cliente; no se repiten esas comprobaciones si su base no ha cambiado. La [code-readability](../.agents/skills/code-readability/SKILL.md) se aplica mientras se escribe, sin una auditoría adicional tras cada implementación.
 
 ```sh
 pnpm skills:check
@@ -16,15 +16,15 @@ Activación: desarrollo de funcionalidades, correcciones, refactorizaciones, imp
 
 La Skill complementa responsabilidades existentes:
 
-| Recurso               | Responsabilidad                                                                         |
-| --------------------- | --------------------------------------------------------------------------------------- |
-| Prettier              | Indentación, comillas, punto y coma, ancho, comas finales y espaciado sintáctico        |
-| ESLint                | Patrones verificables de código, incluidos retornos y usos de tipos                     |
-| TypeScript estricto   | Contratos estáticos, sin eliminar la necesidad de validar datos externos                |
-| code-readability      | Bloques de intención, nombres, flujo, handlers, clases, asincronía y templates legibles |
-| frontend-architecture | Límites de módulos y responsabilidades                                                  |
-| lit-engineering       | Semántica reactiva, templates, lifecycle y recursos                                     |
-| code-review           | Hallazgos, prioridades y evidencia                                                      |
+| Recurso               | Responsabilidad                                                                                    |
+| --------------------- | -------------------------------------------------------------------------------------------------- |
+| Prettier              | Indentación, comillas, punto y coma, ancho, comas finales y espaciado sintáctico                   |
+| ESLint                | Patrones verificables de código, incluidos retornos y usos de tipos                                |
+| TypeScript estricto   | Contratos estáticos, sin eliminar la necesidad de validar datos externos                           |
+| code-readability      | Bloques de intención, nombres, flujo, handlers, clases, asincronía y templates legibles            |
+| frontend-architecture | Límites de módulos y responsabilidades                                                             |
+| lit-engineering       | Semántica reactiva, templates, lifecycle y recursos                                                |
+| code-review           | Cierre de PR, arquitectura importante, seguridad crítica o petición expresa; hallazgos y evidencia |
 
 No se modifican las opciones de Prettier. La separación visual se decide por intención y conserva juntas las operaciones relacionadas. Las llaves se exigen en los bloques nuevos o modificados. No se fuerza una línea vacía después de cada declaración ni se extraen helpers/controladores por sistema.
 
@@ -51,11 +51,13 @@ La adopción es incremental: no se aplica `eslint --fix .` ni se reescriben las 
 
 Las pruebas de tooling ejercitan detección y autofix sobre un consumidor TypeScript, comprueban estabilidad con Prettier y verifican que Astro/JavaScript conservan sus parsers y reglas aplicables. No se ejecutan fixtures de código con efectos externos.
 
-La instalación en `.agents` requiere elevación por los permisos de la sesión. El borrador se prepara y formatea antes de solicitar esa escritura. La política del entorno, no la Skill, impone ese permiso.
+La edición de `.agents` requiere elevación por los permisos de la sesión; prepara y formatea los cambios antes de escribirlos. Esta restricción de permisos no convierte cada uso de una Skill en una instalación o validación nueva.
 
-`quick_validate.py` de skill-creator necesita PyYAML; el Python inicial no lo tiene. La ejecución inicial falla con `ModuleNotFoundError: yaml`. Se distingue esta limitación del resultado de `pnpm skills:check`, que no depende de Python. El estado final de comprobaciones está al final de esta página.
+`pnpm skills:check` es la comprobación estructural habitual cuando se modifican Skills o catálogo. No se instala ni reinvestiga PyYAML para repetir el fallo conocido del validador Python auxiliar; no es un bloqueo de desarrollo.
 
-Para una entrega completa, `AGENTS.md` sigue exigiendo instalación congelada y `pnpm check`. Los navegadores de Playwright no son instalables en el Monterey actual; ninguna prueba de navegador se presenta como aprobada por esta Skill.
+La política de riesgo vive en `AGENTS.md`: formato/pruebas afectadas para cambios pequeños, implementación completa con tests pertinentes para funcionalidades y una ejecución de `check:build` al cerrar PR. No se ejecutan por separado sus pasos ya incluidos sobre el mismo estado. Navegador, axe, responsive y consola se mantienen en CI compatible antes del merge; no se ejecuta Playwright localmente en Monterey. Una restricción conocida se reabre solo si cambia el entorno o aparece nueva evidencia.
+
+Consulta únicamente las Skills aplicables. `frontend-architecture` guía los límites mientras implementas; `quality-engineering` elige pruebas relacionadas; `security-performance` profundiza ante riesgos o cambios pertinentes. `code-review` se reserva para cierre de PR, arquitectura importante, seguridad crítica o solicitud expresa. Mantén resultados y contexto vigentes, sin informes extensos ni microtareas de auditoría.
 
 ## Fuentes y decisión duradera
 
@@ -64,23 +66,3 @@ El [ADR-0003](adr/0003-skills-contract.md) recoge el catálogo y la adopción in
 - [Prettier: líneas vacías y decisiones de formato](https://prettier.io/docs/rationale.html).
 - [ESLint: curly](https://eslint.org/docs/latest/rules/curly), [no-else-return](https://eslint.org/docs/latest/rules/no-else-return) y [deprecación de padding](https://eslint.org/docs/latest/rules/padding-line-between-statements).
 - [typescript-eslint: consistent-type-imports](https://typescript-eslint.io/rules/consistent-type-imports/).
-
-## Resultado de esta entrega
-
-Comprobación del 31 de octubre de 2026:
-
-| Comando o comprobación                                                     | Resultado observado                                                                                                            |
-| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm install --frozen-lockfile`                                           | Pasa; sin cambios en dependencias ni lockfile                                                                                  |
-| `pnpm skills:check`                                                        | Once Skills válidas estructuralmente                                                                                           |
-| Prettier explícito sobre los dos archivos instalados y `pnpm format:check` | Pasan; se usa la configuración real del repositorio                                                                            |
-| `pnpm lint`                                                                | Pasa con las dos reglas nuevas; sin refactorizar la aplicación                                                                 |
-| `pnpm typecheck`                                                           | Pasa: 49 archivos Astro sin errores/avisos/hints y tsc con salida 0                                                            |
-| `pnpm test:tooling`                                                        | Cinco pruebas pasadas, incluidas las dos nuevas de compatibilidad/autofix                                                      |
-| `pnpm test`                                                                | 47 pruebas pasadas en nueve archivos                                                                                           |
-| `pnpm build` y `pnpm docs:check`                                           | Pasan: Marp, 40 rutas, Pagefind, 43 HTML y 2.129 referencias locales/fragmentos                                                |
-| `pnpm check`                                                               | Salida 1 en E2E: 126 fallos al lanzar ejecutables ausentes; ningún cuerpo valida la interfaz. Las puertas anteriores pasan     |
-| `git diff --check`                                                         | Pasa por separado; la última instrucción del check no se alcanza tras el fallo E2E                                             |
-| YAML y recurso enlazado                                                    | Frontmatter analizado con js-yaml ya instalado y referencia a examples.md existente. No sustituye el validador Python auxiliar |
-
-El intento de `quick_validate.py` no llega a validar por falta de PyYAML; no se instala una dependencia global para ocultarlo. La nueva Skill queda instalada y leída explícitamente, con descubrimiento automático pendiente de actualización del catálogo. Los ejemplos se revisan como fragmentos con contexto, no como programas independientes ejecutados. No se hace commit, push ni merge.

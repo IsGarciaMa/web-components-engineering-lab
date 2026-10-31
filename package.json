@@ -21,9 +21,13 @@
     "test:e2e": "node scripts/run-local-tool.mjs playwright test",
     "slides:build": "node scripts/run-local-tool.mjs marp --input-dir presentations --output public/slides",
     "skills:check": "node scripts/validate-skills.mjs",
-    "check": "pnpm skills:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:tooling && pnpm test && pnpm build && pnpm docs:check && pnpm test:e2e && git diff --check",
+    "check": "pnpm check:build",
     "test:tooling": "node --test tests/tooling/*.test.mjs",
-    "docs:check": "node scripts/validate-build.mjs"
+    "docs:check": "node scripts/validate-build.mjs",
+    "check:fast": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:tooling && pnpm test",
+    "check:build": "pnpm check:fast && pnpm build && pnpm docs:check",
+    "check:e2e": "pnpm test:e2e",
+    "check:full": "pnpm check:build && pnpm check:e2e"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.8",

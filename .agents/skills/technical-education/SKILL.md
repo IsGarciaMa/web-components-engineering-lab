@@ -24,4 +24,4 @@ Coloca capítulos en `src/content/docs/capitulos`, código ejecutable en `src/ex
 
 Revisa que cada término nuevo esté explicado o enlazado. El ejercicio debe exigir una decisión, incluir comportamiento observable y tener una solución razonada. Evita preguntas que solo premien memorizar sintaxis.
 
-Ejecuta ejemplos y build de presentaciones cuando estén disponibles. Marca material futuro como pendiente y nunca presentes una demostración no ejecutada como verificada. Produce material original: no reproduzcas ni parafrasees contenido privado de BlueSpire; trabaja desde estándares públicos y experimentos propios.
+Ejecuta los ejemplos y pruebas relacionados con el contenido modificado. Si cambia una presentación, comprueba su generación dentro del build de integración; no repitas el build completo por cada archivo. Reúne la validación integral una vez al cerrar el capítulo y reutiliza la evidencia de CI. Marca material futuro como pendiente y nunca presentes una demostración no ejecutada como verificada. Produce material original: no reproduzcas ni parafrasees contenido privado de BlueSpire; trabaja desde estándares públicos y experimentos propios.
