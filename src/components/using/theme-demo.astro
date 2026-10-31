@@ -1,0 +1,24 @@
+---
+import LabPanel from './lab-panel.astro';
+import source from '../../labs/using/theme-lab.ts?raw';
+import card from '../../examples/using/reading-card.ts?raw';
+---
+
+<LabPanel
+  title="Un tema, dos ámbitos"
+  objective="Cambia tema, borde y radio. Compara herencia compartida y excepción local."
+  sources={[
+    { label: 'Consumidor · theme-lab.ts', code: source },
+    { label: 'Componente · reading-card.ts', code: card },
+  ]}
+>
+  <lab-theme-lab></lab-theme-lab>
+  <p slot="explanation">
+    El contenedor establece variables que heredan las tarjetas a través de
+    Shadow DOM. La segunda redefine el radio en su host. El control de color
+    solo cambia el borde; no transforma el texto en una combinación ilegible.
+  </p>
+</LabPanel>
+<script>
+  import '../../labs/using/theme-lab';
+</script>

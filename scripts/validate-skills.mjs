@@ -30,6 +30,7 @@ const expected = [
   'security-performance',
   'devops-vercel',
   'code-review',
+  'code-readability',
 ];
 const directories = await readdir(root, { withFileTypes: true });
 assert.deepEqual(
@@ -53,5 +54,5 @@ for (const name of expected) {
   assert.ok(manifest[3]?.trim(), `${name}: faltan instrucciones`);
 }
 console.log(
-  `10 Skills válidas estructuralmente en ${root}. ${sourceOnly ? 'Solo fuentes: instalación y descubrimiento no comprobados.' : 'Confirma por separado su descubrimiento en Codex.'}`,
+  `${expected.length} Skills válidas estructuralmente en ${root}. ${sourceOnly ? 'Solo fuentes: instalación y descubrimiento no comprobados.' : 'Confirma por separado su descubrimiento en Codex.'}`,
 );

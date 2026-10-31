@@ -1,5 +1,7 @@
 # Entorno de PR-00
 
+Este documento conserva la observación de PR-00. En PR-01 el repositorio ya tiene historial y remoto; la base main se comprobó sincronizada y el trabajo está en `feat/01-using-web-components`. El [informe actual](pr-01-validation.md) registra las nuevas dependencias y verificaciones. Las limitaciones de Monterey continúan.
+
 Revisión final del 30 de octubre de 2026:
 
 | Herramienta | Observado            |

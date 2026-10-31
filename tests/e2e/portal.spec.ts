@@ -79,7 +79,7 @@ test('landing, capítulos pendientes y 404', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     'Laboratorios',
   );
-  await page.goto('/capitulos/01-plataforma-web/');
+  await page.goto('/capitulos/02-custom-elements/');
   await expect(
     page.getByText('Este capítulo todavía no está publicado.', {
       exact: false,
@@ -94,7 +94,7 @@ test('landing, capítulos pendientes y 404', async ({ page }) => {
 
 test('búsqueda sobre el build de producción', async ({ page }) => {
   await page.goto('/');
-  await page.locator('site-search button').click();
+  await page.getByRole('button', { name: 'Buscar', exact: true }).click();
   const search = page.locator('.pagefind-ui__search-input');
   await search.fill('contador');
   await expect(
@@ -107,7 +107,7 @@ test('búsqueda sobre el build de producción', async ({ page }) => {
 
 test('tema, RTL, reduced motion y forced colors', async ({ page }) => {
   await page.goto('/guias/contador/');
-  const select = page.locator('starlight-theme-select select');
+  const select = page.locator('starlight-theme-select select:visible');
   for (const theme of ['dark', 'light']) {
     await select.selectOption(theme);
     await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
@@ -142,10 +142,10 @@ test('ruta editorial, capítulo y recorrido de aprendizaje', async ({
   await expect(page.locator('.chapter-card')).toHaveCount(11);
   await expect(
     page.locator('.chapter-card [data-status="pending"]'),
-  ).toHaveCount(11);
+  ).toHaveCount(10);
   await page
     .getByRole('link', {
-      name: 'La plataforma web y los estándares',
+      name: 'Custom Elements y ciclo de vida',
       exact: true,
     })
     .click();
@@ -153,7 +153,7 @@ test('ruta editorial, capítulo y recorrido de aprendizaje', async ({
     page.getByRole('heading', { name: 'Objetivos de aprendizaje' }),
   ).toBeVisible();
   await expect(
-    page.getByText('Distinguir estándares, APIs y bibliotecas.', {
+    page.getByText('Registrar un elemento con una API pública.', {
       exact: true,
     }),
   ).toBeVisible();
@@ -206,7 +206,11 @@ test('ruta editorial, capítulo y recorrido de aprendizaje', async ({
   await page
     .getByText('Consultar la solución razonada', { exact: true })
     .click();
-  await expect(page.locator('details')).toContainText('updateComplete');
+  await expect(
+    page
+      .locator('details[open]')
+      .filter({ hasText: 'Consultar la solución razonada' }),
+  ).toContainText('updateComplete');
 });
 
 test('progreso opcional, persistente y reversible', async ({ page }) => {
@@ -216,11 +220,14 @@ test('progreso opcional, persistente y reversible', async ({ page }) => {
     progress.getByRole('button', { name: 'Activar progreso local' }),
   ).toBeVisible();
   expect(
-    await page.evaluate(() => localStorage.getItem('lab-learning-progress-v1')),
+    await page.evaluate(() => localStorage.getItem('lab-learning-progress-v2')),
   ).toBeNull();
   await progress
     .getByRole('button', { name: 'Activar progreso local' })
     .click();
+  await expect(
+    progress.getByRole('button', { name: 'Marcar lección como completada' }),
+  ).toBeFocused();
   await progress
     .getByRole('button', { name: 'Marcar lección como completada' })
     .click();
@@ -229,20 +236,20 @@ test('progreso opcional, persistente y reversible', async ({ page }) => {
   ).toHaveAttribute('aria-pressed', 'true');
   await page.reload();
   await expect(
-    progress.getByText('1 de 1 lección disponible completada.'),
+    progress.getByText('1 de 8 lecciones disponibles completadas.'),
   ).toBeVisible();
   await page.goto('/ruta/');
   await expect(
-    progress.getByText('1 de 1 lección disponible completada.'),
+    progress.getByText('1 de 8 lecciones disponibles completadas.'),
   ).toBeVisible();
   await expect(
     page.locator('.chapter-card [data-status="pending"]'),
-  ).toHaveCount(11);
+  ).toHaveCount(10);
   await progress
     .getByRole('button', { name: 'Borrar y desactivar progreso' })
     .click();
   expect(
-    await page.evaluate(() => localStorage.getItem('lab-learning-progress-v1')),
+    await page.evaluate(() => localStorage.getItem('lab-learning-progress-v2')),
   ).toBeNull();
   await page.reload();
   await expect(
@@ -255,7 +262,7 @@ test('almacenamiento bloqueado y datos corruptos no impiden aprender', async ({
 }) => {
   await page.goto('/guias/contador/');
   await page.evaluate(() =>
-    localStorage.setItem('lab-learning-progress-v1', '{invalid'),
+    localStorage.setItem('lab-learning-progress-v2', '{invalid'),
   );
   await page.reload();
   const progress = page.locator('lab-learning-progress');
@@ -285,7 +292,7 @@ for (const width of [320, 375, 768, 1280, 1440]) {
     for (const route of [
       '/',
       '/ruta/',
-      '/capitulos/01-plataforma-web/',
+      '/capitulos/02-custom-elements/',
       '/laboratorios/',
       '/laboratorios/contador/',
       '/ejercicios/contador/',
@@ -325,7 +332,7 @@ test('capturas de la experiencia principal', async ({ page }, testInfo) => {
     for (const [name, route] of [
       ['landing', '/'],
       ['ruta', '/ruta/'],
-      ['capitulo', '/capitulos/01-plataforma-web/'],
+      ['capitulo', '/capitulos/02-custom-elements/'],
       ['laboratorio', '/laboratorios/contador/'],
     ] as const) {
       await page.goto(route);
@@ -351,7 +358,9 @@ test('contraste automatizado de la academia en ambos temas', async ({
   for (const route of ['/', '/laboratorios/contador/']) {
     await page.goto(route);
     for (const theme of ['light', 'dark']) {
-      await page.locator('starlight-theme-select select').selectOption(theme);
+      await page
+        .locator('starlight-theme-select select:visible')
+        .selectOption(theme);
       await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
       await page.addScriptTag({ content: axe.source });
       const violations = await page.evaluate(

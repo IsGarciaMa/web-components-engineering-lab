@@ -1,9 +1,15 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import { satteri } from '@astrojs/markdown-satteri';
+import { keyboardRegions } from './scripts/keyboard-regions.mjs';
 
 export default defineConfig({
   output: 'static',
+  markdown: { processor: satteri({ hastPlugins: [keyboardRegions] }) },
   trailingSlash: 'always',
+  redirects: {
+    '/capitulos/01-plataforma-web/': '/capitulos/01-using-web-components/',
+  },
   integrations: [
     starlight({
       title: 'Web Components Engineering Lab',
@@ -29,8 +35,35 @@ export default defineConfig({
           ],
         },
         {
-          label: '11 capítulos',
-          items: [{ autogenerate: { directory: 'capitulos' } }],
+          label: 'Capítulos',
+          items: [
+            {
+              label: '01 · Using Web Components',
+              items: [
+                {
+                  slug: 'capitulos/01-using-web-components',
+                  label: 'Mapa del capítulo',
+                },
+                {
+                  autogenerate: {
+                    directory: 'capitulos/01-using-web-components',
+                  },
+                },
+              ],
+            },
+            ...[
+              '02-custom-elements',
+              '03-atributos-propiedades',
+              '04-shadow-dom',
+              '05-slots-composicion',
+              '06-eventos',
+              '07-formularios',
+              '08-lit-fundamentos',
+              '09-lit-reactividad',
+              '10-lit-composicion',
+              '11-ingenieria-produccion',
+            ].map((slug) => ({ slug: `capitulos/${slug}` })),
+          ],
         },
       ],
     }),

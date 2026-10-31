@@ -1,0 +1,103 @@
+---
+title: 'Personalizar sin romper la encapsulación'
+description: 'Lección original de Using Web Components con contrato, laboratorio, buenas prácticas y autoevaluación.'
+sidebar:
+  order: 3
+---
+
+import Navigation from '../../../../components/using/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+
+import Demo from '../../../../components/using/parts-demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import flow from '../../../../../diagrams/using-styling.mmd?raw';
+
+<Navigation current="03-personalizacion" />
+
+## Introducción
+
+Shadow DOM delimita un árbol y el alcance de sus selectores. Ayuda a evitar colisiones entre el componente y la página, pero obliga a diseñar una API de estilo. El consumidor necesita saber si puede cambiar un valor, decorar una parte concreta o proporcionar contenido propio. Cada opción tiene un coste de compatibilidad distinto.
+
+## Objetivos
+
+- Distinguir estilos internos de una API de personalización.
+- Aplicar `::part()` y seguir una reexportación con `exportparts`.
+- Explicar por qué `::slotted()` no da acceso general al árbol del consumidor.
+
+## Dos lados de la frontera
+
+<Diagram
+  source={flow}
+  caption="El consumidor conoce tokens y partes; la tarjeta conserva su implementación interna."
+/>
+
+Dentro de la raíz, `:host` selecciona el host. `:host([compact])` aplica una variante cuando el host tiene ese atributo. Ambos son mecanismos de CSS para Shadow DOM; Lit solo ofrece una forma de declarar la hoja de estilos.
+
+Fuera, escribir `lab-reading-card button` busca un descendiente en Light DOM. No selecciona el botón de la raíz shadow. Una clase interna tampoco se convierte en pública porque puedas verla en DevTools. Depender de ella acopla la aplicación a un detalle que el autor podría cambiar.
+
+## Del nombre de parte al estilo exterior
+
+El autor marca un nodo con `part="action"`; el consumidor escribe `lab-reading-card::part(action)`. El nombre es un contrato público. Permite personalizar el nodo expuesto sin conocer su profundidad ni sus clases. No habilita una consulta arbitraria de descendientes dentro de él.
+
+```css
+lab-reading-card::part(action) {
+  border-style: dashed;
+  border-width: 3px;
+}
+lab-card-frame::part(card-action) {
+  border-style: dashed;
+}
+```
+
+Una raíz shadow anidada introduce otra frontera. El `lab-card-frame` del ejemplo no publica automáticamente todas las partes de sus hijos. Su tarjeta interna declara `exportparts="surface:card-surface, action:card-action"`: el frame ofrece alias para que el consumidor use los nombres de su propio contrato. La [especificación CSS Shadow](https://drafts.csswg.org/css-shadow-1/) detalla esta exposición deliberada.
+
+## Laboratorio: directo y anidado
+
+<Demo />
+
+Aplica las partes y observa ambos botones. El segundo está detrás del frame. Busca en el código la regla exterior y el atributo `exportparts`; ninguna operación accede a `shadowRoot`. Cambia el foco con Tab: decorar un botón no debe eliminar su indicación de foco ni su semántica.
+
+El ejemplo también asigna un párrafo con clase `note` al slot de la tarjeta. Sigue perteneciendo al árbol que lo creó. La tarjeta usa `::slotted(.note)` para dar cursiva al elemento asignado; no lo clona ni lo adopta como propiedad exclusiva.
+
+## Slots: contenido y alcance
+
+`::slotted()` se escribe dentro de una raíz shadow y selecciona elementos asignados directamente a un slot que cumplan su selector. No selecciona nodos de texto ni todos los descendientes de esos elementos. Si asignas un `div` que contiene un `strong`, `::slotted(strong)` no alcanza ese nieto por el mero hecho de estar dentro del `div`. El consumidor conserva la posibilidad de estilizar su contenido Light DOM.
+
+El slot distribuye nodos; no convierte los nodos asignados en hijos internos del shadow tree. Esta diferencia explica por qué un componente puede ofrecer un lugar para contenido sin hacerse dueño de cada decisión de ese contenido. Véase [MDN: `::slotted()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::slotted).
+
+## Qué herramienta elegir
+
+| Herramienta         | Controla                           | Uso razonable                       | Límite                                             |
+| ------------------- | ---------------------------------- | ----------------------------------- | -------------------------------------------------- |
+| CSS Custom Property | Un valor consumido por CSS interno | Tema, densidad o radio              | Solo afecta donde el autor la usa                  |
+| `::part()`          | Un elemento expuesto               | Borde del botón, superficie         | La parte debe existir y ser pública                |
+| `exportparts`       | Partes de un elemento anidado      | Mantener una API en un wrapper      | Requiere reexportación en cada frontera pertinente |
+| Slot                | Contenido del consumidor           | Nota, icono o acciones documentadas | No sustituye libremente el template                |
+| `:host()`           | Estado del host desde dentro       | Variante `compact`                  | Lo declara el componente                           |
+
+Usa tokens para decisiones compartidas y partes para casos concretos que la API de tokens no cubre. Exponer demasiadas partes limita futuras refactorizaciones: cambiar un nodo público puede romper integraciones aunque no cambie JavaScript.
+
+## Buenas prácticas y errores habituales
+
+No inyectes una hoja de estilos en una raíz shadow ajena ni sustituyas un nodo gestionado por Lit. Aunque una raíz sea abierta, esa operación depende de su implementación y puede ser sobrescrita en la siguiente actualización. Si falta una API necesaria, proponla a la biblioteca o compón una alternativa.
+
+Evita personalizar un botón para que deje de parecer interactivo. Una parte permite cambiar CSS, pero no demuestra que el resultado conserve contraste, dimensiones y estados. Los estilos de interacción forman parte de la revisión del consumidor.
+
+Es frecuente intentar `::part(surface) button`, asumir que `exportparts` exporta propiedades JavaScript o usar `::slotted()` desde una hoja global. Son contratos diferentes: selectores de partes, publicación de partes y distribución de contenido.
+
+## Resumen y autoevaluación
+
+Personalizar sin romper encapsulación consiste en negociar una superficie pública suficiente. Tokens, partes y slots ofrecen grados de control complementarios.
+
+**Entrevista:** una regla sobre `::part(action)` funciona en una tarjeta directa y falla al introducir un frame. ¿Qué revisarías? Si existe una nueva frontera shadow, comprueba la reexportación y el alias que publica el frame antes de aumentar especificidad.
+
+## Referencias oficiales
+
+- [CSS Shadow Module](https://drafts.csswg.org/css-shadow-1/).
+- [MDN: `::part()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::part).
+- [MDN: `exportparts`](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/exportparts).
+- [Lit: estilos](https://lit.dev/docs/components/styles/).
+
+<Progress lessonId="using-styling" />
+
+<Navigation current="03-personalizacion" end />

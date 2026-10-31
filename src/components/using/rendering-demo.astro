@@ -1,0 +1,27 @@
+---
+import LabPanel from './lab-panel.astro';
+import Preview from './static-preview.astro';
+import source from '../../examples/using/static-summary.ts?raw';
+import markup from './static-preview.astro?raw';
+---
+
+<LabPanel
+  title="HTML primero, comportamiento después"
+  objective="Comprueba una mejora progresiva en Light DOM: el texto no depende del registro."
+  sources={[
+    {
+      label: 'HTML estático real · static-preview.astro',
+      code: markup,
+      lang: 'astro',
+    },
+    { label: 'Mejora cliente · static-summary.ts', code: source },
+  ]}
+>
+  <Preview />
+  <p slot="explanation">
+    Con JavaScript desactivado, ambas explicaciones siguen visibles y el botón
+    permanece oculto. Al conectar, se habilita un control con estado expandido.
+    El elemento mejora nodos previstos en su contrato: no hidrata Lit ni
+    sustituye un árbol renderizado por otro framework.
+  </p>
+</LabPanel>

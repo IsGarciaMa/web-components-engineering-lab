@@ -3,6 +3,18 @@ import { chapters } from '../../data/curriculum';
 ---
 
 <div class="academy-home not-content">
+  <section class="using-release" aria-labelledby="using-release-title">
+    <p class="eyebrow">NUEVO · CAPÍTULO 01 COMPLETO</p>
+    <h2 id="using-release-title">Using Web Components</h2>
+    <p>
+      Siete lecciones para consumir bibliotecas, personalizar componentes e
+      integrarlos con JavaScript, React y Astro. Ocho laboratorios y tres
+      ejercicios para comprobar cada decisión.
+    </p>
+    <a class="lab-button primary" href="/capitulos/01-using-web-components/"
+      >Comenzar Using Web Components →</a
+    >
+  </section>
   <section class="academy-section" aria-labelledby="approach-title">
     <div class="section-heading">
       <div>
@@ -88,7 +100,8 @@ import { chapters } from '../../data/curriculum';
               <h3>{stage.title}</h3>
               <p>{stage.text}</p>
               <span class="editorial-badge" data-status="pending">
-                {stage.count} capítulos · Pendientes
+                {stage.count} capítulos ·{' '}
+                {stage.number === '01—07' ? '1 disponible' : 'Pendientes'}
               </span>
             </>
           </article>
@@ -96,8 +109,9 @@ import { chapters } from '../../data/curriculum';
       }
     </div>
     <p class="section-note">
-      La ruta se publicará progresivamente. Ya puedes recorrer la experiencia
-      inicial y probar el laboratorio de contadores.
+      Using Web Components ya está disponible. Los otros diez capítulos se
+      publicarán progresivamente; la experiencia inicial de contadores continúa
+      como orientación.
     </p>
   </section>
   <section class="featured-lab" aria-labelledby="featured-title">

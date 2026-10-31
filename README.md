@@ -1,18 +1,22 @@
 # Web Components Engineering Lab
 
-Academia open source en español para entender Web Components, Lit y las APIs del navegador. PR-00 incorpora una experiencia educativa inicial; los once capítulos conservan su orden y estado pendiente.
+Academia open source en español para entender Web Components, Lit y las APIs del navegador. El capítulo 01, **Using Web Components**, incorpora siete lecciones completas; los otros diez capítulos conservan su estado pendiente.
 
 ## Recorrer la academia
 
 - `/`: identidad visual propia, introducción y metodología.
 - `/ruta/`: once capítulos con objetivos y estado editorial, y progreso local opcional.
-- `/capitulos/01-plataforma-web/` y siguientes: plantilla común con planificación y recursos de orientación.
+- `/capitulos/01-using-web-components/`: mapa de siete lecciones, navegación, progreso y recursos. La URL anterior redirige aquí.
+- `/laboratorios/using-web-components/`: ocho demos con código real.
+- `/ejercicios/using-web-components/`: tres niveles con soluciones voluntarias.
+- `/slides/using-web-components.html`: presentación del capítulo.
+- Capítulos 02–11: planificación futura.
 - `/guias/contador/`: lección inicial disponible, contrato nativo/Lit y autoevaluación.
 - `/laboratorios/contador/`: contadores funcionales, código fuente y registro de eventos.
 - `/ejercicios/contador/`: práctica local, criterios de aceptación y solución razonada.
 - `/guias/recursos/`: Mermaid y presentación Marp.
 
-No se han desarrollado los capítulos de PR-01 a PR-11. El progreso solo cuenta la lección publicada, se activa voluntariamente y permanece en este navegador.
+El progreso cuenta la lección inicial y las siete de PR-01, se activa voluntariamente y permanece en este navegador. Lee los datos de PR-00 sin perder su avance. No se ha iniciado PR-02.
 
 ## Ejecutar
 
@@ -30,18 +34,26 @@ pnpm build
 pnpm preview
 ```
 
-Antes de entregar, instala los navegadores en un sistema soportado y ejecuta todas las puertas:
+Durante el desarrollo usa pruebas relacionadas con el cambio. Los niveles agregados reutilizan los scripts existentes:
 
-```sh
-pnpm exec playwright install --with-deps chromium firefox webkit
-pnpm check
-```
+| Comando                           | Alcance                                                        |
+| --------------------------------- | -------------------------------------------------------------- |
+| `pnpm check:fast`                 | Prettier, ESLint, tipos, tooling y Vitest                      |
+| `pnpm check:build` o `pnpm check` | Rápidas una vez, build con Marp/Pagefind y referencias locales |
+| `pnpm check:e2e`                  | Playwright sobre un build vigente; solo en entorno compatible  |
+| `pnpm check:full`                 | Integración y navegador; solo en entorno compatible            |
 
-Los scripts exigen las herramientas locales y sus versiones exactas. `pnpm check` incluye Skills, Prettier, ESLint, tipos, tooling, Vitest, Marp, Astro, Playwright y diff. Los E2E generan capturas en `test-results/`, además de comprobar navegación, eventos, progreso, búsqueda, temas, accesibilidad automatizada y reflow.
+Al cerrar el capítulo ejecuta `check:build` una vez, sin repetir antes `check:fast`. Los cambios pequeños solo necesitan formato y pruebas relacionadas. `pnpm skills:check` se usa cuando cambian Skills o su catálogo, y siempre en CI.
+
+La CI separa calidad y navegador en Ubuntu 24.04. El job de navegador descarga el `dist` validado por calidad, instala los tres motores y ejecuta E2E sin repetir build. Conserva navegación, eventos, progreso, búsqueda, temas, accesibilidad, reflow y consola; sube reportes ante fallos y las capturas de referencia explícitas también al pasar.
+
+En un entorno compatible puedes filtrar, por ejemplo `pnpm check:e2e --project=chromium --grep "progreso"`. Monterey conserva su bloqueo conocido: no instales ni ejecutes los motores allí. No hace falta repetir ese diagnóstico ni instalar PyYAML para el validador auxiliar.
+
+Los scripts siguen exigiendo herramientas locales de las versiones fijadas. Las políticas de selección de pruebas y problemas conocidos viven en `AGENTS.md`; no se genera un informe de auditoría por cada tarea.
 
 ## Arquitectura
 
-Astro/Starlight conserva documentación, búsqueda, navegación y temas. Los componentes Astro componen el portal; Lit gestiona la pequeña interfaz de progreso. Los ejemplos nativos y Lit siguen independientes del portal. El laboratorio consume sus eventos y muestra los archivos reales mediante imports `?raw`. No se añaden dependencias.
+Astro/Starlight conserva documentación, búsqueda, navegación y temas. Los componentes Astro componen el portal; Lit gestiona el progreso y los controles de los laboratorios. Los ejemplos nativos y Lit siguen independientes del portal. El laboratorio consume sus eventos y muestra los archivos reales mediante imports `?raw`. PR-01 añade Web Awesome y React para consumo e integración reales, con versiones fijadas; el [ADR-0005](docs/adr/0005-using-web-components.md) documenta el alcance.
 
 ```text
 src/data/                  Índice editorial y lección disponible
@@ -60,8 +72,10 @@ docs/adr/                  Decisiones duraderas
 
 ## Estado de entrega
 
-PR-00 sigue en **NO-GO para el primer commit** mientras falte la validación en navegador compatible. La instalación congelada, también limpia desde el store local, las diez Skills reconocidas, los tipos, las 28 pruebas Vitest, las 3 de tooling y el build están comprobados. Playwright 1.64.1 no admite macOS 12: consola, responsive, axe y capturas quedan pendientes. La auditoría de producción devuelve cero avisos; la completa registra nueve en tooling, con alcance documentado en [seguridad](docs/security.md).
+PR-00 está integrada en `main`. PR-01 se desarrolla en `feat/01-using-web-components`, sin commit, push, merge ni despliegue durante esta entrega. Consulta [alcance, validación y límites de PR-01](docs/pr-01-validation.md), [arquitectura](docs/architecture.md) y [el ADR del capítulo](docs/adr/0005-using-web-components.md).
 
-Consulta [validación y límites](docs/validation.md), [Git y entorno](docs/environment.md), [estado de las Skills](docs/skills.md), [arquitectura](docs/architecture.md) y [Vercel](docs/deployment.md). No hay URL de repositorio configurada: la interfaz no publica un enlace ficticio a GitHub. No se ha hecho commit, push, merge ni despliegue.
+El entorno local sigue siendo macOS 12: los navegadores actuales de Playwright no se pueden instalar aquí. Las pruebas preparadas no se consideran aprobadas hasta ejecutarlas en un sistema compatible. La CI heredada de main falla en E2E; se documentan sus causas y las correcciones en el informe de PR-01.
+
+Los resultados de [PR-00](docs/validation.md) son evidencia histórica, no una certificación del capítulo nuevo. La auditoría actual y las limitaciones se registran en el informe de PR-01. No se publica ni se configura hosting adicional.
 
 Licencia [MIT](LICENSE).

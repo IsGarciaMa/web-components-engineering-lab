@@ -1,0 +1,112 @@
+---
+title: 'Renderizado estático y mejora progresiva'
+description: 'Integra Web Components con contratos explícitos, ejemplos reales y límites de renderizado documentados.'
+sidebar:
+  order: 7
+---
+
+import Navigation from '../../../../components/using/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+
+import Demo from '../../../../components/using/rendering-demo.astro';
+import DeclarativePreview from '../../../../components/using/dsd-preview.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import flow from '../../../../../diagrams/using-rendering.mmd?raw';
+import { Code } from '@astrojs/starlight/components';
+import declarativeSource from '../../../../components/using/dsd-preview.astro?raw';
+
+<Navigation current="07-renderizado" />
+
+## Introducción
+
+“Está renderizado en servidor” puede significar cosas distintas: llegó un host vacío, llegó contenido Light DOM útil o llegó también el árbol interno del componente. Antes de hablar de hidratación, inspecciona qué HTML recibe el navegador y qué trabajo sigue pendiente.
+
+Un servidor no necesita registrar todos los elementos para producir HTML. El navegador tampoco necesita una clase personalizada para mostrar texto y enlaces dentro de un host. Esa separación permite entregar contenido útil y añadir interacción después.
+
+## Objetivos
+
+- Distinguir CSR, SSR y SSG por dónde y cuándo generan HTML.
+- Entregar una mejora progresiva real con Astro.
+- Separar Declarative Shadow DOM, registro y eventual hidratación.
+
+## Comparativa de estrategias
+
+| Estrategia | Generación inicial                    | Trabajo cliente                           | Coste o decisión                                                    |
+| ---------- | ------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------- |
+| CSR        | HTML mínimo y JavaScript              | Construir la interfaz                     | La primera experiencia depende de descargar y ejecutar código       |
+| SSR        | HTML generado al recibir una petición | Añadir interacción o hidratar lo previsto | Requiere runtime servidor y decidir caché/personalización           |
+| SSG        | HTML generado durante build           | Mejora o hidratación opcional             | Contenido estable y fácil de servir; cambios requieren regeneración |
+
+Una página puede combinar estrategias. Este portal usa **SSG**: `pnpm build` produce `dist`. Los contadores y la tarjeta Lit construyen su Shadow DOM en cliente. Eso no constituye SSR completo de Lit aunque Astro haya generado sus hosts.
+
+SSR y SSG describen cuándo producir HTML; la mejora progresiva describe cómo conservar una experiencia básica mientras añades capacidades. No son categorías mutuamente excluyentes.
+
+<Diagram
+  source={flow}
+  caption="La lectura está en el HTML de build; el registro añade un control sin reemplazarla."
+/>
+
+## Ejemplo real: conservar los nodos del servidor
+
+<Demo />
+
+La información y el párrafo ampliado están en el archivo HTML antes de ejecutar scripts. El botón empieza oculto porque necesita comportamiento. `connectedCallback()` lo habilita y suscribe un listener; al desconectar se retira. Al pulsarlo se cambia `hidden` en el párrafo acordado y se actualiza `aria-expanded`.
+
+Esta manipulación tiene un contrato concreto de propiedad: el elemento mejora su Light DOM generado por Astro, sin un renderer cliente compitiendo por esos mismos nodos. No se modifica ningún template de Lit. La reconexión conserva el estado y no duplica suscripciones.
+
+Para verificar la base, desactiva JavaScript y recarga esta página: ambos párrafos deben seguir visibles, con el botón oculto. Para verificar la mejora, vuelve a habilitarlo, pliega la explicación y comprueba teclado, foco y estado expandido. Las pruebas E2E separan estos dos escenarios; un build por sí solo no demuestra la interacción.
+
+## Declarative Shadow DOM no es registro
+
+Un `template` con `shadowrootmode="open"` puede indicar al parser HTML que cree una raíz shadow. No necesita por ello una clase registrada. Esta capacidad del navegador permite entregar estructura encapsulada desde HTML. No contiene un algoritmo genérico que hidrate cualquier framework.
+
+<DeclarativePreview />
+
+<Code code={declarativeSource} lang="astro" />
+
+En este ejemplo el host es un `div`, no un Custom Element registrado. El párrafo de Light DOM se distribuye por un slot. Astro necesita `is:inline` en ese slot para emitir el elemento HTML en lugar de tratarlo como su mecanismo de slots de componentes. Con JavaScript desactivado, un navegador con soporte DSD sigue creando la raíz al parsear el documento. En un navegador sin soporte, el contenido del template no se muestra y el párrafo Light DOM conserva utilidad.
+
+No generalices el resultado a insertar la misma cadena mediante `innerHTML`: el tratamiento de shadow roots declarativas depende de la API de parseo. La referencia de [MDN sobre Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM#declaratively_with_html) explica la sintaxis y sus condiciones.
+
+## Hidratación y actualización cliente
+
+Hidratar significa conectar un renderer a estructura producida previamente bajo un protocolo compatible. Registrar un Custom Element solo asocia una clase al nombre y activa su lifecycle. Crear una raíz shadow en un constructor es otra operación. Confundirlas produce promesas falsas y puede hacer que se borre o reconstruya contenido ya servido.
+
+Lit ofrece herramientas específicas para SSR e hidratación, con sus requisitos y límites. Este capítulo **no instala ni configura un pipeline SSR de Lit**. Tampoco certifica SSR por encontrar un paquete transitivo con “ssr” en su nombre. Las referencias de [Lit SSR](https://lit.dev/docs/ssr/overview/) deben revisarse antes de adoptar esa arquitectura.
+
+## Evitar desajustes
+
+El servidor y el cliente deben compartir datos iniciales, versión del componente y una regla de propiedad del DOM. Fechas locales, números aleatorios, preferencias de almacenamiento o condiciones de viewport pueden producir resultados distintos si se incluyen en el HTML inicial sin una estrategia.
+
+No renderices dos versiones completas del mismo contenido y ocultes una después de cargar: puedes duplicar anuncios, IDs y enlaces. No importes una clase que evalúa `HTMLElement` en frontmatter Node suponiendo que todos sus efectos son seguros. En los ejemplos Astro, los módulos del navegador se importan dentro de `<script>`.
+
+## SEO y rendimiento con criterio
+
+Texto y enlaces entregados en HTML reducen la dependencia de ejecución cliente para leer y descubrir contenido. Eso no garantiza posicionamiento ni sustituye títulos, semántica y URLs correctas. Un host vacío puede necesitar JavaScript para que su contenido significativo exista; compruébalo en el HTML servido.
+
+El HTML estático no hace gratuito el JavaScript: revisa qué script se carga por página, cuánto trabajo hace y si introduce saltos. Este capítulo carga React solo en su demo y Web Awesome solo en la página que lo consume. Antes de introducir SSR o lazy loading adicional, mide una necesidad: primera lectura, capacidad de interacción, red y estabilidad visual son preguntas distintas.
+
+## Errores habituales
+
+- Llamar “SSR de Lit” a generar `<lab-reading-card>` sin su contenido interno.
+- Esperar que `client:load` registre cualquier etiqueta personalizada.
+- Suponer que DSD y `customElements.define()` hacen lo mismo.
+- Ofrecer un control activo sin un comportamiento disponible.
+- Afirmar mejora progresiva sin probar con JavaScript desactivado.
+
+## Resumen y autoevaluación
+
+Primero identifica qué HTML llega. Después explica cómo se registra el comportamiento y quién conserva cada nodo. El ejemplo funcional de esta entrega es SSG con mejora progresiva; el ejemplo DSD demuestra parseo declarativo, no hidratación Lit.
+
+**Entrevista:** ¿un host registrado con contenido que aparece solo tras JavaScript está “renderizado en servidor”? Solo su host, si eso es lo único enviado. Una respuesta precisa describe qué contenido llegó y qué parte se construyó en cliente.
+
+## Referencias oficiales
+
+- [Astro: componentes](https://docs.astro.build/en/basics/astro-components/) y [renderizado bajo demanda](https://docs.astro.build/en/guides/on-demand-rendering/).
+- [MDN: Shadow DOM declarativo](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM#declaratively_with_html).
+- [Lit: SSR](https://lit.dev/docs/ssr/overview/).
+- [WHATWG: template](https://html.spec.whatwg.org/multipage/scripting.html#the-template-element).
+
+<Progress lessonId="using-rendering" />
+
+<Navigation current="07-renderizado" end />

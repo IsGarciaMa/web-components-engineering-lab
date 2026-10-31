@@ -1,0 +1,51 @@
+---
+title: 'Avanzado · Integración e inicialización'
+description: 'Integra el componente con un renderer y distingue el HTML inicial de su comportamiento cliente.'
+---
+
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/frameworks/react-consumer.ts?raw';
+
+[← Ejercicios del capítulo](/ejercicios/using-web-components/)
+
+## Enunciado
+
+Integra el componente con un renderer y distingue el HTML inicial de su comportamiento cliente.
+
+## Objetivos
+
+- Usar propiedades y eventos desde React o Astro.
+- Justificar inicialización, propiedad del DOM y alternativa sin JavaScript.
+
+## Requisitos
+
+- Elegir React 19.3.1 o Astro de las integraciones del capítulo.
+- Mantener el módulo de Custom Element en el lado del navegador.
+
+## Criterios de aceptación
+
+- Cambiar el lector desde el consumidor actualiza la tarjeta.
+- lesson-select muestra el nombre actualizado.
+- La raíz o los listeners del consumidor se limpian al desconectar.
+- El informe distingue host HTML, registro y render Lit cliente.
+- El ejemplo static-summary conserva su texto con JavaScript desactivado.
+- No se afirma SSR completo de Lit ni se añade un wrapper sin necesidad.
+
+## Verificación
+
+Escribe una predicción y una prueba observable por cada criterio. Usa `pnpm test` para el contrato y `pnpm build` seguido de `pnpm test:e2e` en un sistema soportado para DOM, estilos e interacción. El caso sin JavaScript necesita una recarga con ese entorno desactivado.
+
+## Solución de referencia
+
+<details>
+  <summary>Consultar la solución razonada</summary>
+
+La integración React de referencia importa el registro antes de `createRoot`, pasa el objeto `reader`, escucha `onlesson-select` y usa una referencia para `reset()`. Desmonta su raíz al desconectar. La alternativa Astro asigna propiedades desde un script de navegador y retira listeners con funciones estables.
+
+Para contenido imprescindible usa el patrón `static-summary`: genera texto en HTML y mejora su comportamiento después. No conviertas el host de la tarjeta React en una prueba de SSR. La solución debe explicar qué experiencia permanece si no hay JavaScript, además de conseguir que un clic funcione.
+
+<Code code={source} lang="ts" />
+
+</details>
+
+[Volver al capítulo](/capitulos/01-using-web-components/)

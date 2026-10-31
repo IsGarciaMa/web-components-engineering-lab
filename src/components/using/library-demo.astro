@@ -1,0 +1,22 @@
+---
+import '@awesome.me/webawesome/dist/styles/themes/default.css';
+import LabPanel from './lab-panel.astro';
+import source from '../../labs/using/library-lab.ts?raw';
+---
+
+<LabPanel
+  title="Consumir una biblioteca real"
+  objective="Activa y desactiva un botón de Web Awesome 3.14.0 instalado desde npm."
+  sources={[{ label: 'Consumidor · library-lab.ts', code: source }]}
+>
+  <lab-library-lab></lab-library-lab>
+  <p slot="explanation">
+    El módulo de la biblioteca registra <code>wa-button</code>. El consumidor
+    usa su atributo booleano y escucha <code>click</code>, un evento nativo. No
+    es una implementación del botón creada para simular una biblioteca. El
+    prefijo <code>wa-</code> pertenece al proveedor.
+  </p>
+</LabPanel>
+<script>
+  import '../../labs/using/library-lab';
+</script>

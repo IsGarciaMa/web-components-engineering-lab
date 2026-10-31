@@ -1,0 +1,8 @@
+flowchart TD
+  accTitle: API de personalización
+  accDescr: Un contenedor transmite tokens a la tarjeta. Sus partes se exponen al consumidor. Un frame puede reexportarlas con nombres propios.
+  C[Consumidor] -->|variables heredadas| H[Host de la tarjeta]
+  C -->|CSS part action| A[Botón público]
+  H --> S[Shadow DOM interno]
+  S --> A
+  F[Frame] -->|exportparts action a card-action| A

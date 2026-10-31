@@ -1,0 +1,26 @@
+---
+import LabPanel from './lab-panel.astro';
+import source from '../../examples/frameworks/react-consumer.ts?raw';
+---
+
+<LabPanel
+  title="React 19.3.1 sin wrapper"
+  objective="Pasa un objeto, recibe un CustomEvent y llama a un método mediante una referencia."
+  sources={[{ label: 'Integración real · react-consumer.ts', code: source }]}
+>
+  <lab-react-demo
+    ><p>
+      La demostración de React se monta en cliente. Continúa con el código si
+      JavaScript está desactivado.
+    </p></lab-react-demo
+  >
+  <p slot="explanation">
+    React crea y conserva su propio contenedor. El elemento ya está registrado
+    al montar: reconoce la propiedad <code>reader</code>, enlaza <code
+      >onlesson-select</code
+    > y mantiene una referencia. Desconectar la demo desmonta su raíz.
+  </p>
+</LabPanel>
+<script>
+  import '../../examples/frameworks/react-consumer';
+</script>

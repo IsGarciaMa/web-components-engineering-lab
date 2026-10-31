@@ -56,7 +56,9 @@ import LearningProgress from '../progress/learning-progress.astro';
                     ))}
                   </ul>
                   <a class="text-link" href={`/capitulos/${chapter.slug}/`}>
-                    Ver objetivos y planificación{' '}
+                    {chapter.status === 'available'
+                      ? 'Explorar el capítulo'
+                      : 'Ver objetivos y planificación'}{' '}
                     <span aria-hidden="true">→</span>
                   </a>
                 </div>

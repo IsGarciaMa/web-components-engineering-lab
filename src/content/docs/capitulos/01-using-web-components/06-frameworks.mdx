@@ -1,0 +1,103 @@
+---
+title: 'Integrar Web Components con frameworks'
+description: 'Integra Web Components con contratos explícitos, ejemplos reales y límites de renderizado documentados.'
+sidebar:
+  order: 6
+---
+
+import Navigation from '../../../../components/using/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+
+import ReactDemo from '../../../../components/using/framework-demo.astro';
+import AstroDemo from '../../../../components/using/astro-demo.astro';
+import { Code } from '@astrojs/starlight/components';
+import angularSource from '../../../../examples/frameworks/reference/angular-consumer.ts.txt?raw';
+import vueSource from '../../../../examples/frameworks/reference/vue-consumer.vue.txt?raw';
+
+<Navigation current="06-frameworks" />
+
+## Introducción
+
+La interoperabilidad no elimina las diferencias entre renderers. Una etiqueta con guion sigue siendo un elemento DOM, pero cada framework decide cómo escribir entradas, suscribirse a eventos y representar el host en servidor. Integrar consiste en hacer coincidir ese comportamiento con el contrato del componente, sin crear dos propietarios para los mismos nodos.
+
+## Objetivos
+
+- Verificar propiedades complejas y eventos con React 19.3.1.
+- Elegir entre consumo directo y adaptador por una necesidad concreta.
+- Reconocer los puntos de configuración de Angular, Vue y Astro.
+
+## React actual: comprobar la versión importa
+
+Este portal fija **React y React DOM 19.3.1**, versión estable consultada en npm el 30 de octubre de 2026. No extrapoles restricciones de React 18. Desde React 19 el soporte de Custom Elements incluye asignación de propiedades presentes en la instancia y listeners de eventos personalizados. En cliente, si una propiedad existe en el elemento, React puede asignarle datos ricos; en caso contrario puede tratarla como atributo. Por eso el orden de registro forma parte de la integración. Véanse [React DOM: Custom HTML elements](https://react.dev/reference/react-dom/components) y [React 19](https://react.dev/blog/2024/12/05/react-19#support-for-custom-elements).
+
+La tarjeta declara `reader` como propiedad durante la construcción. Su módulo se importa antes de que React la monte. El consumidor pasa `{ name }`, usa `onlesson-select` con el nombre exacto del evento y conserva una `ref` para llamar a `reset()`.
+
+## Integración ejecutable con React
+
+<ReactDemo />
+
+Cambia el lector desde React y activa el botón de la tarjeta. El mensaje debe mostrar el nuevo nombre. Luego usa la referencia para restablecer: cambia `selected`, sin producir un nuevo evento de selección. El código desplegable es el mismo módulo que se ejecuta, escrito con `createElement` para no añadir una configuración JSX al portal.
+
+React posee únicamente el contenedor de su demo. `lab-reading-card` posee su raíz shadow. Cuando desaparece la demo, su raíz React se desmonta. No insertamos nodos manualmente en el template de React ni en el de Lit.
+
+Una `ref` es útil para métodos imperativos, foco o APIs que no se expresen en props. Si añades listeners manuales mediante un efecto, devuelve su limpieza; no uses una ref como excusa para mutar el botón interno. Para JSX, declara los tipos de tu etiqueta en el espacio de nombres `React.JSX.IntrinsicElements` que use tu versión de tipos; la interoperabilidad en ejecución y el tipado del compilador son capas diferentes.
+
+## ¿Necesitas `@lit/react`?
+
+| Consumo directo                                                           | Wrapper explícito                                                                    |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Adecuado si React actual ya escribe las propiedades y escucha tus eventos | Útil para publicar una API React con nombres y tipos propios                         |
+| Mantiene el contrato DOM visible                                          | Puede mapear `onLessonSelect` al evento DOM `lesson-select`                          |
+| Evita una capa cuando no aporta comportamiento                            | Puede unificar convenciones en un design system o dar soporte a versiones anteriores |
+
+`@lit/react` ofrece `createComponent` y un mapa de eventos. No transforma automáticamente un host vacío en HTML Lit renderizado en servidor. Algunas explicaciones históricas de wrappers describen limitaciones de React anterior a 19; contrástalas con la documentación de la versión que realmente ejecutas. Aquí no se necesita wrapper para demostrar el contrato. El paquete puede aparecer como dependencia transitiva de una biblioteca sin que esta demo lo utilice.
+
+## Astro: HTML y scripts de navegador
+
+<AstroDemo />
+
+Astro genera el host y el contenido Light DOM en build. El `<script>` importa el módulo en navegador y conecta eventos usando DOM APIs. No lleva `client:load`: esa directiva pertenece a islas de frameworks compatibles, no al registro normal de un Custom Element.
+
+El objeto se asigna mediante JavaScript. No lo serializamos dentro de un atributo suponiendo que Astro lo convertirá en la propiedad rica. El consumidor retira sus listeners al desconectar. Renderizar el host no evalúa el `render()` de Lit en el servidor.
+
+## Angular: schema, propiedades y eventos DOM
+
+`CUSTOM_ELEMENTS_SCHEMA` permite que el compilador acepte elementos personalizados; no descarga ni registra su definición. Usa bindings de propiedad para datos ricos y el nombre exacto del evento entre paréntesis. `@angular/elements` sirve para publicar componentes Angular como Custom Elements; no es un requisito para consumir uno existente.
+
+<Code code={angularSource} lang="ts" />
+
+Esta receta es un componente standalone para incorporar a una aplicación Angular compatible con `afterNextRender`. El import dentro de ese callback se reserva al navegador, importante si esa aplicación también genera HTML en servidor. La propiedad puede asignarse antes del registro: el LitElement usado aquí recupera valores previos al upgrade. No generalices esa capacidad a cualquier biblioteca.
+
+No se instala ni se ejecuta Angular en este portal. Para verificar la receta, añade los módulos `using` al proyecto Angular, conserva sus rutas relativas, registra `ReaderComponent` en una ruta, ejecuta su build con comprobación estricta de templates y comprueba el payload al pulsar el botón. La receta utiliza APIs documentadas, pero no se contabiliza como un test pasado aquí.
+
+## Vue: configuración del compilador y `.prop`
+
+Configura `isCustomElement` en el plugin de compilación para el prefijo que consumes. Evita marcar todos los nombres con guion si eso ocultaría errores de resolución de componentes Vue. Vue comprueba propiedades presentes en el elemento; `.prop` expresa de forma explícita que `reader` debe ser una propiedad, incluso antes del upgrade.
+
+<Code code={vueSource} lang="html" />
+
+En un proyecto Vue con Vite, guarda el contenido como `Reader.vue`, aplica la opción de compilador indicada y conserva las rutas del ejemplo. Ejecuta `vue-tsc --noEmit` si forma parte de tu proyecto y su build. Comprueba que `reader` sigue siendo objeto y que el listener recibe un `CustomEvent`; la forma de `detail` depende del elemento emisor. Vue no se instala ni se ejecuta en este portal.
+
+## Buenas prácticas y errores habituales
+
+Registra a tiempo, conserva una única fuente de verdad para el estado y decide quién posee cada subárbol. Mantén los objetos fuera de atributos salvo que el contrato pida expresamente JSON serializado. Comprobar un evento en el borde del consumidor evita asumir que cualquier emisor respeta tus tipos.
+
+Los fallos habituales son confundir un schema con registro, corregir un binding sin revisar su versión, omitir la limpieza de un efecto y añadir un wrapper para ocultar un nombre de evento incorrecto. Un adaptador debe resolver una diferencia real, no sustituir la lectura de la API.
+
+## Resumen y autoevaluación
+
+El componente conserva su API DOM; el framework aporta reglas de binding y lifecycle propias. La demo verifica dos consumidores reales, React y Astro, y ofrece recetas explícitas para Angular y Vue sin afirmar cuatro aplicaciones probadas.
+
+**Entrevista:** un array termina en el atributo como `a,b`. ¿Necesitas inmediatamente un wrapper? Primero comprueba versión del renderer, existencia de la propiedad al montar y documentación del binding. Si la aplicación sigue necesitando adaptación, define exactamente qué normaliza el wrapper.
+
+## Referencias oficiales
+
+- [React DOM](https://react.dev/reference/react-dom/components), [versiones](https://react.dev/versions) y [refs](https://react.dev/reference/react/useRef).
+- [Lit: React wrappers](https://lit.dev/docs/frameworks/react/).
+- [Angular: CUSTOM_ELEMENTS_SCHEMA](https://angular.dev/api/core/CUSTOM_ELEMENTS_SCHEMA), [afterNextRender](https://angular.dev/api/core/afterNextRender).
+- [Vue: Web Components](https://vuejs.org/guide/extras/web-components.html).
+- [Astro: scripts y eventos](https://docs.astro.build/en/guides/client-side-scripts/).
+
+<Progress lessonId="using-frameworks" />
+
+<Navigation current="06-frameworks" end />

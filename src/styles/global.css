@@ -878,3 +878,194 @@ lab-lit-counter:not(:defined) {
   min-block-size: 44px;
   font-size: 0.85rem;
 }
+
+/* Capítulo 01: superficies de estudio y laboratorios con ámbito explícito. */
+.using-chapter-meta,
+.using-controls,
+.using-next {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+.using-chapter-meta {
+  margin-block: 1.5rem;
+  color: var(--lab-muted);
+  font-size: 0.85rem;
+}
+.using-lesson-grid {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  margin-block: 2rem;
+}
+.using-lesson-grid li {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+}
+.using-lesson-grid h2 {
+  font-size: 1.3rem;
+  margin: 0 0 0.75rem;
+}
+.using-lesson-grid a {
+  color: var(--lab-ink);
+}
+.using-lesson-grid p {
+  color: var(--lab-muted);
+}
+.using-lesson-nav {
+  border-block-end: 1px solid var(--lab-line);
+  padding-block-end: 1.25rem;
+  margin-block-end: 2rem;
+}
+.using-lesson-nav .eyebrow {
+  margin-block: 1rem;
+}
+.using-lesson-nav summary,
+.using-sources summary {
+  min-block-size: 44px;
+  padding: 0.75rem;
+  cursor: pointer;
+  color: var(--lab-accent);
+}
+.using-lesson-nav a[aria-current='page'] {
+  font-weight: 700;
+  text-decoration-thickness: 3px;
+}
+.using-next {
+  justify-content: space-between;
+  border-block-start: 1px solid var(--lab-line);
+  padding-block: 1.5rem;
+}
+.using-next a {
+  min-block-size: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.using-lab {
+  border: 1px solid var(--lab-line);
+  border-radius: var(--lab-radius);
+  margin-block: 2rem;
+  overflow: hidden;
+}
+.using-lab > header {
+  padding: 1.25rem;
+  background: var(--lab-surface);
+  border-block-end: 1px solid var(--lab-line);
+}
+.using-lab h2 {
+  margin-block: 0.5rem;
+  font-size: 1.4rem;
+}
+.using-lab p {
+  line-height: 1.75;
+}
+.using-lab-stage,
+.using-lab-explanation {
+  padding: 1.25rem;
+}
+.using-lab-explanation {
+  border-block-start: 1px solid var(--lab-line);
+}
+.using-lab > .section-note {
+  padding: 1rem 1.25rem;
+}
+.using-sources details {
+  border-block-start: 1px solid var(--lab-line);
+}
+.using-sources pre {
+  max-block-size: 32rem;
+  overflow: auto;
+}
+.using-sources .expressive-code {
+  margin: 0;
+}
+.using-controls {
+  margin-block-end: 1rem;
+}
+.using-controls button,
+.static-summary button {
+  min-block-size: 44px;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid currentColor;
+  border-radius: 0.4rem;
+  background: var(--lab-surface);
+  color: var(--lab-accent);
+  font: inherit;
+  cursor: pointer;
+}
+lab-react-demo,
+lab-astro-consumer,
+lab-static-summary {
+  display: block;
+}
+.static-summary {
+  padding: 1rem;
+  border: 1px solid var(--lab-line);
+  border-radius: 0.6rem;
+}
+.using-lab-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.using-lab-grid > a {
+  display: block;
+  border: 1px solid var(--lab-line);
+  padding: 1.5rem;
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  color: var(--lab-ink);
+  text-decoration: none;
+}
+.using-lab-grid h2 {
+  font-size: 1.25rem;
+  margin-block: 0.75rem;
+}
+.using-lab-grid p {
+  color: var(--lab-muted);
+  line-height: 1.7;
+}
+.using-lab-grid > a:hover {
+  border-color: var(--lab-accent);
+}
+.using-release {
+  padding: 1.5rem;
+  border: 1px solid var(--lab-accent);
+  border-radius: var(--lab-radius);
+  background: var(--lab-surface);
+  margin-block: 2rem;
+}
+.using-release h2 {
+  margin-block: 0.5rem 1rem;
+}
+@media (max-width: 40rem) {
+  .using-lab-grid {
+    grid-template-columns: 1fr;
+  }
+  .using-lesson-grid li {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  .using-lab-stage,
+  .using-lab-explanation {
+    padding: 1rem;
+  }
+}
+@media (forced-colors: active) {
+  .using-lab,
+  .using-lab > header,
+  .using-sources details,
+  .using-release,
+  .using-lesson-grid li,
+  .using-lab-grid > a,
+  .static-summary {
+    border-color: CanvasText;
+  }
+}
