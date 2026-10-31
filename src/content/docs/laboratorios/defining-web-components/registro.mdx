@@ -1,0 +1,38 @@
+---
+title: 'Registration & Upgrade'
+description: 'Una definición por nombre; registro no equivale a conexión.'
+---
+
+import Demo from '../../../../components/defining/demo.astro';
+
+[← Ocho laboratorios del capítulo](/laboratorios/defining-web-components/)
+
+## Objetivo
+
+Una definición por nombre; registro no equivale a conexión. Predice el resultado antes de cada acción y compara tu predicción con el texto observable.
+
+## Experimento
+
+<Demo kind="registro">
+  <p>Una definición por nombre; registro no equivale a conexión.</p>
+</Demo>
+
+## Recorrido reproducible
+
+1. Comprueba get antes de registrar y conserva una referencia al nodo conectado.
+2. Registra el nombre y compara la identidad y la instancia.
+3. Aplica upgrade al fragmento desconectado: cambiar su clase no lo conecta.
+
+## Buenas prácticas y errores frecuentes
+
+Un guard evita duplicados locales, pero no demuestra compatibilidad de versiones. Abre las fuentes del panel para seguir la llamada real. No edites nodos internos de un componente como sustituto de su API pública. Los resultados proceden de operaciones reales; no hay un editor de ejecución arbitraria.
+
+## Accesibilidad y límites
+
+Todos los controles usan elementos nativos, etiquetas y foco visible. Los resultados se presentan en texto; el historial de lifecycle se consulta como lista con scroll y teclado, sin anunciar automáticamente cada fila. Comprueba también zoom, tema y contenido largo. La revisión automática con axe y las pruebas de responsive están preparadas para CI; no sustituyen lectura con tecnología de asistencia.
+
+## Explica lo observado
+
+¿Qué cambió en el objeto o en su contrato y qué solo cambió en su presentación? Describe una prueba que fallaría si el error indicado volviera a aparecer.
+
+[Volver a la lección](/capitulos/02-defining-web-components/01-autonomos/) · [Referencia oficial](https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/upgrade)

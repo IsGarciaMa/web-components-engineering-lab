@@ -1,0 +1,89 @@
+---
+title: 'Autonomous Custom Elements'
+description: 'Define y verifica Autonomous Custom Elements: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 1
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/registration-note.ts?raw';
+import diagram from '../../../../../diagrams/defining-autonomous.mmd?raw';
+
+<Navigation current="01-autonomos" />
+
+## Introducción y objetivos
+
+Un elemento autónomo añade un nombre y una clase propios al vocabulario HTML del documento. No hereda la semántica de un botón o un campo de texto: extiende `HTMLElement`. Por eso una etiqueta nueva no adquiere teclado, rol ni participación en formularios por el hecho de estar registrada. Usa HTML nativo dentro de ella cuando necesites esas capacidades.
+
+Al terminar podrás registrar una clase, distinguir creación de conexión y explicar qué cambia en un nodo existente durante el upgrade. También identificarás errores que no debe esconder un guard de registro.
+
+## Definir, registrar, crear y conectar
+
+Declarar `class RegistrationNote extends HTMLElement` crea una clase JavaScript. `customElements.define(name, Constructor)` incorpora una definición al registro. `document.createElement(name)` crea una instancia; `append()` puede conectarla a un documento. Son operaciones distintas: puedes tener una instancia definida y desconectada, o un nodo conectado todavía sin definición.
+
+<Diagram
+  source={diagram}
+  caption="La definición y la conexión son ejes distintos; el upgrade conserva la identidad del nodo."
+/>
+
+En este capítulo usamos el registro global `window.customElements`. Los registros con alcance tienen condiciones de soporte y composición propias y quedan fuera de esta introducción. No presupongas que cualquier árbol de cualquier documento comparte una definición.
+
+### Un nombre válido
+
+Usa un nombre que empiece con una letra ASCII minúscula, incluya un guion y cumpla la gramática de nombres de la especificación. No se permiten mayúsculas ASCII; hay nombres históricos reservados, como `annotation-xml`. El prefijo `lab-` es una convención del proyecto, no un requisito del navegador. `lab-profile` funciona; `profile` y `Lab-profile` no sirven como nombres personalizados.
+
+### Constructor y creación de instancias
+
+Llama a `super()` antes de usar `this`. Inicializa estado y una raíz propia, sin depender de hijos o atributos del host ni añadir atributos/hijos al host durante la construcción. El parser y el upgrade no ofrecen el mismo contexto inicial. La clase de referencia solo prepara su Shadow DOM.
+
+Después de registrar puedes usar `new RegistrationNote()` o `document.createElement('lab-registration-note')`. La segunda forma expresa la relación con el documento y permite el tipado de etiquetas. Invocar `new` sobre una subclase no registrada puede producir un error del constructor HTML; una clase JavaScript declarada no basta.
+
+## Laboratorio: identidad y fragmentos
+
+<Demo kind="registro">
+  <p>
+    Predice qué instancia mejorará al registrar. Después llama a upgrade del
+    fragmento y compara isConnected. El fragmento sigue desconectado aunque su
+    elemento ya sea una instancia de la clase.
+  </p>
+</Demo>
+
+`get(name)` devuelve el constructor registrado o `undefined`. `whenDefined(name)` permite coordinar un consumidor con una definición futura; no espera conexión, fuentes, red adicional ni un render de Lit. Con un nombre inválido su promesa se rechaza. Con un nombre válido que nadie registra puede permanecer pendiente.
+
+El registro provoca el upgrade de candidatos conectados correspondientes. Para preparar un subárbol desconectado de forma explícita se usa `customElements.upgrade(root)`: no lo inserta. La referencia al nodo, sus hijos y los listeners ya existentes se conservan; no hay que sustituir el host por otro.
+
+## Código auténtico
+
+<Code code={source} lang="ts" />
+
+## TypeScript y errores de registro
+
+Puedes declarar una entrada de `HTMLElementTagNameMap` para que `document.createElement('lab-native-meter')` tenga el tipo del componente. Esto ayuda al compilador, pero no descarga módulos ni garantiza que el registro haya sucedido. Un `querySelector` genérico tampoco valida una instancia en ejecución; cuando la identidad importe usa `instanceof` tras cargar su clase.
+
+| Error               | Causa que debes investigar                                   |
+| ------------------- | ------------------------------------------------------------ |
+| `SyntaxError`       | Nombre que no cumple la gramática                            |
+| `NotSupportedError` | Nombre o constructor ya usado; opciones `extends` no válidas |
+| `TypeError`         | El valor entregado no es un constructor apropiado            |
+
+Un guard `if (!customElements.get(name))` evita repetir la misma demo. En una biblioteca no prueba que dos versiones sean compatibles: puede ocultar que otro paquete registró una clase distinta. Investiga el conflicto y centraliza el módulo de registro. No captures todos los errores para fingir una definición correcta. El registro global no ofrece `undefine()`; recarga para repetir el experimento desde cero.
+
+## Comparación con Lit, resumen y entrevista
+
+`LitElement` ya extiende la infraestructura de Custom Elements; también requiere registro y un nombre válido. Un decorator de Lit puede abreviar la llamada, pero no crea otro mecanismo de identidad.
+
+**Resumen:** una clase define comportamiento, el registro lo asocia a un nombre, la creación produce una instancia y la conexión depende del árbol. **Entrevista:** ¿puede ejecutarse un constructor sin `connectedCallback()`? Sí: crea una instancia definida y déjala desconectada. Compruébalo en el visualizador, sin memorizar una secuencia de callbacks.
+
+## Referencias oficiales
+
+- [WHATWG: definiciones y requisitos de constructores](https://html.spec.whatwg.org/multipage/custom-elements.html).
+- [MDN: upgrade de un subárbol](https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/upgrade).
+- [MDN: whenDefined](https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/whenDefined).
+
+<Progress lessonId="defining-autonomous" />
+
+<Navigation current="01-autonomos" end />

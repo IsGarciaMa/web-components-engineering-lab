@@ -140,8 +140,9 @@ export class LearningProgress extends LitElement {
       <h2 id="progress-title">Tu progreso, en este navegador</h2>
       <p>
         Opcional y sin cuenta. Se guarda solo en este navegador; no se
-        sincroniza entre dispositivos. Incluye la lección inicial y las siete
-        lecciones de Using Web Components. Los capítulos pendientes no cuentan.
+        sincroniza entre dispositivos. Incluye la lección inicial y las
+        lecciones publicadas de Using y Defining Web Components. Los capítulos
+        pendientes no cuentan.
       </p>
       ${this.enabled
         ? html` <progress

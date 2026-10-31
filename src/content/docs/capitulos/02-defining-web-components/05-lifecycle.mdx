@@ -1,0 +1,118 @@
+---
+title: 'Custom Element Lifecycle'
+description: 'Define y verifica Custom Element Lifecycle: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 5
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/lifecycle-probe.ts?raw';
+import diagram from '../../../../../diagrams/defining-lifecycle.mmd?raw';
+
+<Navigation current="05-lifecycle" />
+
+## Introducción y objetivos
+
+Un componente puede construirse sin conectarse nunca, desconectarse y volver a entrar en el mismo documento, cambiar de documento o recibir atributos mientras está desconectado. Su ciclo de vida es un conjunto de reacciones a operaciones, no un guion lineal que siempre se representa completo.
+
+Esta lección conecta cada recurso con la condición que lo necesita. Aprenderás a separar inicialización de conexión, hacer reconexiones seguras, observar atributos, razonar sobre movimientos y distinguir los callbacks del navegador del sistema de actualización de Lit.
+
+## Responsabilidades por callback
+
+| Callback                     | Qué lo provoca                                      | Responsabilidad habitual                    | Suposición peligrosa                         |
+| ---------------------------- | --------------------------------------------------- | ------------------------------------------- | -------------------------------------------- |
+| `constructor()`              | Creación o upgrade de la instancia                  | Estado y nodos internos propios             | Que host, atributos o hijos estén preparados |
+| `connectedCallback()`        | Conexión al documento                               | Suscripciones ligadas a conexión            | Que sea la primera o única conexión          |
+| `disconnectedCallback()`     | Desconexión                                         | Liberar esos recursos                       | Que la instancia haya sido destruida         |
+| `adoptedCallback()`          | Cambio de documento                                 | Revisar dependencias del documento anterior | Que exista una ventana en el nuevo documento |
+| `attributeChangedCallback()` | Reacción de un atributo observado                   | Convertir y actualizar lo afectado          | Que solo ocurra después de conectar          |
+| `connectedMoveCallback()`    | Movimiento preservado cuando la API está disponible | Adaptar efectos dependientes de posición    | Que todo `append()` use este callback        |
+
+La instancia no dispone de un destructor universal. Su memoria se libera cuando deja de ser alcanzable y el recolector lo decide. Una referencia desde un listener global puede impedir esa liberación aunque el elemento haya salido de la pantalla.
+
+<Diagram
+  source={diagram}
+  caption="Las operaciones disparan reacciones distintas; los atributos pueden cambiar tanto conectado como desconectado."
+/>
+
+## Construcción e inicialización
+
+La construcción prepara campos, referencias y una raíz interna. No leas atributos o hijos del host como precondición del constructor, ni añadas atributos o hijos al host para hacer funcionar la instancia. La ruta de creación por parser no equivale a la de upgrade. Los ejemplos construyen nodos dentro de la raíz propia y dejan las entradas del consumidor para las reacciones correspondientes.
+
+Inicializar una vez no significa conectar una vez. Si creas un árbol interno en cada `connectedCallback()`, puedes duplicarlo al reinsertar. Si añades el mismo comportamiento mediante funciones nuevas, puedes multiplicar listeners aunque el DOM parezca igual. Conserva una función estable y relaciona su suscripción con conexión/desconexión.
+
+## Visualizador: callbacks reales
+
+<Demo kind="lifecycle">
+  <p>
+    Crea la sonda sin conectar. Cambia label, conecta, emite señal, desconecta y
+    vuelve a emitir. Reconecta y repite. Cada fila viene de un método de la
+    sonda; el registro guarda las últimas 20 entradas. La señal externa modifica
+    su contador, pero no se etiqueta como un callback nativo.
+  </p>
+</Demo>
+
+### Experimento guiado
+
+1. **Crear instancia:** debe aparecer `constructor`. Su mera creación no implica `connectedCallback`.
+2. **Aplicar atributo antes de conectar:** aparece una reacción del atributo observado. El estado puede cambiar fuera del documento.
+3. **Conectar y emitir señal:** el contador de la sonda aumenta. Se instaló un listener en la ventana del documento actual.
+4. **Desconectar y emitir señal:** el contador no debe aumentar. Quitar la instancia del DOM no basta para limpiar un listener externo: lo hace su callback.
+5. **Reconectar y emitir una vez:** debe aumentar una sola vez. Un salto múltiple sería evidencia de suscripciones duplicadas.
+6. **Mover con append:** compara las reacciones realmente recibidas. Un movimiento clásico de un elemento conectado puede causar desconexión y reconexión.
+7. **Adoptar:** el laboratorio usa otro `Document` inerte, sin iframe ni recursos. Se observa un `adoptedCallback` real. Conectar después lo devuelve al documento visible y puede generar nuevas reacciones.
+
+No deduzcas que esta secuencia de botones es la secuencia obligatoria de todos los componentes. Es una selección de operaciones para probar responsabilidades. El registro es ordenado por un contador por instancia, sin usar tiempos de espera arbitrarios.
+
+## Limpieza y reconexión
+
+<Code code={source} lang="ts" />
+
+La referencia `#listeningWindow` conserva el destino exacto del listener para retirarlo aunque cambie `ownerDocument`. Usar siempre el `window` global al limpiar sería un error si se instaló en otra ventana. El documento inerte tiene `defaultView === null`; la ausencia es un caso válido, no una excepción que debamos ocultar.
+
+El método de conexión primero retira cualquier suscripción anterior y después instala la actual. El de desconexión retira el listener y su referencia. Los nodos propios y su estado no se destruyen. Para observers, timers o suscripciones externas aplica el mismo razonamiento: enlaza adquisición y liberación; no añadas mecanismos que la demo no necesita.
+
+Si hay operaciones asíncronas, considera que pueden terminar después de desconectar. Cancelar una petición o ignorar un resultado obsoleto puede ser necesario según su contrato. No conviertas `isConnected` en una solución universal: una instancia desconectada puede seguir aceptando propiedades, y algunas tareas deben conservarse entre conexiones.
+
+### Adopción
+
+`adoptNode()` cambia el documento del nodo; no lo inserta en el destino. La sonda registra la reacción sin simularla. Un componente que consulte estilos, servicios o listeners del documento debe revisar esas dependencias al adoptar. No asumas que todos los cambios de documento incluyen exactamente el mismo orden de conexiones; examina las operaciones ejecutadas y el estado correspondiente.
+
+### Movimiento con preservación
+
+`Element.moveBefore()` y `connectedMoveCallback()` permiten tratar un movimiento sin la pareja clásica de desconexión/reconexión cuando se cumplen sus condiciones. No sustituyen todas las operaciones del DOM ni permiten mover cualquier nodo entre cualquier documento. La demo mueve entre dos destinos conectados del mismo documento y comprueba la disponibilidad del método antes de usarlo.
+
+La [referencia actual de moveBefore](https://developer.mozilla.org/en-US/docs/Web/API/Element/moveBefore) sigue marcando disponibilidad limitada. La detección de capacidad, los tests en los tres motores y el fallback a las operaciones clásicas son más útiles que una afirmación universal de soporte. En un navegador sin método, el laboratorio muestra el límite y conserva el resto de acciones. No implementamos una simulación que registre `connectedMoveCallback` artificialmente.
+
+## Reacciones de atributos
+
+La lista `observedAttributes` determina qué nombres generan reacciones. Los atributos existentes durante un upgrade pueden producir callbacks iniciales; eliminar uno proporciona `null` como valor nuevo. Llamar a `setAttribute` con el mismo texto también puede generar una reacción: filtra trabajo redundante según el contrato, sin atribuirle al navegador la política de igualdad de tu componente.
+
+La sonda registra reacciones incluso si el valor se repite porque su finalidad es observarlas. El medidor de la siguiente lección protege el setter frente a escrituras recursivas. Son dos contratos intencionadamente distintos.
+
+## Qué añade Lit
+
+Lit conserva el lifecycle nativo y añade actualizaciones reactivas: un cambio de propiedad solicita trabajo, agrupa cambios y actualiza el template asíncronamente. `willUpdate`, `render`, `firstUpdated`, `updated` y `updateComplete` pertenecen a ese sistema, no a `HTMLElement`.
+
+Sobrescribir `connectedCallback` o `disconnectedCallback` en una clase Lit exige preservar `super` para conservar el comportamiento de la base. `firstUpdated` se refiere a la primera actualización del componente, no a cada reconexión. No limpies una suscripción en `disconnectedCallback` si solo la instalas en `firstUpdated` y esperas que vuelva sola: debes diseñar cómo se reinstala. `updateComplete` tampoco espera automáticamente toda tarea externa ni todos los descendientes.
+
+## Errores frecuentes, resumen y entrevista
+
+No registres el contenido del visualizador mediante llamadas manuales a métodos de lifecycle: provocaría un historial engañoso. No dependas de pausas para decidir si un callback ocurrió. No ocultes la falta de soporte con filas de ejemplo que parezcan reales. El consumidor escucha directamente la instancia; al reiniciar la retira, desuscribe y deja de retenerla. El historial acotado evita crecer indefinidamente.
+
+**Resumen:** construye estado, conecta recursos repetibles y libera lo adquirido. **Entrevista:** ¿por qué eliminar un nodo puede no resolver una fuga? Porque una referencia externa, como un listener en `window`, puede seguir reteniendo el objeto. Demuéstralo con el contador conectado/desconectado, no con una captura estática del DOM.
+
+## Referencias oficiales
+
+- [WHATWG: reacciones de Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-element-reactions).
+- [DOM: adopción de nodos](https://dom.spec.whatwg.org/#concept-node-adopt).
+- [MDN: moveBefore y compatibilidad](https://developer.mozilla.org/en-US/docs/Web/API/Element/moveBefore).
+- [Lit: lifecycle y actualizaciones](https://lit.dev/docs/components/lifecycle/).
+
+<Progress lessonId="defining-lifecycle" />
+
+<Navigation current="05-lifecycle" end />

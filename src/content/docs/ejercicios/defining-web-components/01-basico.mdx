@@ -1,0 +1,43 @@
+---
+title: 'Básico · Medidor con contrato'
+description: 'Construye lab-native-meter con una propiedad numérica value entre 0 y 100 y un booleano muted por presencia.'
+---
+
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/native-meter.ts?raw';
+
+[← Ejercicios de Defining Web Components](/ejercicios/defining-web-components/)
+
+## Enunciado y objetivos
+
+Construye lab-native-meter con una propiedad numérica value entre 0 y 100 y un booleano muted por presencia. Justifica el contrato y demuestra el comportamiento mediante operaciones DOM, sin invocar callbacks manualmente.
+
+## Requisitos
+
+- Extender HTMLElement y registrar el nombre una sola vez.
+- Crear un output con nombre accesible; no depender de atributos/hijos en el constructor.
+- Definir observedAttributes y getters/setters públicos sin recursión.
+
+## Criterios de aceptación
+
+- value=25 muestra 25; el setter limita 250 a 100 y convierte NaN en 0.
+- Eliminar value devuelve el getter a 0.
+- muted="false" sigue activado; muted=false elimina el atributo.
+- La vista responde a mutaciones externas y la instancia puede reconectarse sin duplicarse.
+
+## Verificación
+
+En desarrollo ejecuta `pnpm test tests/unit/defining-components.test.ts`. Los casos de composición y navegador están en `tests/e2e/defining-web-components.spec.ts` y se ejecutan en CI compatible. Al cerrar capítulo se usa una sola ejecución de `pnpm check:build`; no ejecutes Playwright localmente en Monterey.
+
+## Solución de referencia opcional
+
+<details>
+  <summary>Consultar la solución razonada</summary>
+
+El atributo es la fuente de verdad. El getter interpreta el texto y el setter serializa solo si difiere. El callback actualiza el output sin volver a escribir el atributo. La recuperación de propiedades tempranas ocurre al conectar. El código publicado incluye el registro y el mapa de etiquetas para TypeScript.
+
+<Code code={source} lang="ts" />
+
+</details>
+
+[Volver al capítulo](/capitulos/02-defining-web-components/)

@@ -1,0 +1,83 @@
+---
+title: 'Customizable Built-in Elements'
+description: 'Define y verifica Customizable Built-in Elements: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 8
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/confirm-button.ts?raw';
+import diagram from '../../../../../diagrams/defining-builtins.mmd?raw';
+
+<Navigation current="08-built-ins" />
+
+## Introducción y objetivos
+
+La denominación del índice es Customizable Built-in Elements; la especificación HTML utiliza **customized built-in elements**. La idea consiste en extender una clase HTML concreta para conservar su comportamiento nativo y añadir lógica. Es distinta de envolver un botón dentro de un elemento autónomo.
+
+Aprenderás a relacionar clase base, `extends` e `is`, valorar la compatibilidad y ofrecer una alternativa funcional. Esta técnica es opcional: el portal no depende de ella.
+
+## Funcionamiento
+
+Un autónomo extiende `HTMLElement` y usa una etiqueta como `lab-action`. Un built-in personalizado que extiende un botón deriva de `HTMLButtonElement`, se registra con `{ extends: 'button' }` y se representa con `<button is="lab-confirm-button">`. La etiqueta local sigue siendo `button`, con su semántica nativa; `is` no es un cambio cosmético que convierta cualquier elemento ya creado.
+
+<Diagram
+  source={diagram}
+  caption="La clase base y el tipo de registro deben concordar con el botón que se crea."
+/>
+
+```html
+<button is="lab-confirm-button" type="button">Confirmar</button>
+```
+
+Para creación programática se usa `document.createElement('button', { is: 'lab-confirm-button' })`. Poner `is` más tarde mediante `setAttribute` no convierte retroactivamente un botón ordinario en la instancia de tu clase. Extender `HTMLButtonElement` pero registrar como autónomo tampoco equivale a heredar todas sus capacidades correctamente.
+
+## Código real y prueba opcional
+
+<Code code={source} lang="ts" />
+
+<Demo kind="debugging">
+  <p>
+    Pulsa Probar built-in opcional. El laboratorio verifica la instancia creada;
+    si no hay soporte, informa del límite y mantiene el resto de controles
+    nativos. Si existe, el botón confirma mediante un evento real.
+  </p>
+</Demo>
+
+El ejemplo usa una función de creación para retrasar el registro hasta la prueba. El consumidor gestiona la excepción de un entorno sin soporte y comprueba `instanceof`: que exista `customElements` no demuestra que una implementación admita todos los tipos de definición. El evento `lab-confirm` es nuestro contrato local, no un nuevo evento estándar de botones.
+
+## Compatibilidad y elección
+
+La [guía actual de MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements) señala que Safari no planea soportar customized built-ins. El [explorador de capacidades de Web Platform DX](https://web-platform-dx.github.io/web-features-explorer/features/customized-built-in-elements/) mantiene el estado por motor. Esta comprobación de documentación no equivale a haber ejecutado el ejemplo en esos navegadores: los E2E reales se reservan a CI compatible.
+
+| Opción                      | Ventaja                                        | Coste o límite                                          |
+| --------------------------- | ---------------------------------------------- | ------------------------------------------------------- |
+| Botón HTML con listener     | Semántica, teclado y amplia interoperabilidad  | Composición de comportamiento fuera de una clase propia |
+| Built-in personalizado      | Extender la implementación nativa en una clase | Soporte desigual; markup y registro específicos         |
+| Autónomo con botón interior | API propia y composición explícita             | Diseñar host, estados y semántica sin duplicarlos       |
+
+La opción sencilla para una acción suele ser un botón nativo con un listener o una función de mejora progresiva. Si eliges un autónomo que contiene un botón, deja que el botón gestione la interacción. No asignes además rol y `tabindex` al host sin un patrón que lo justifique, o puedes generar dos controles para una misma acción.
+
+## Buenas prácticas y errores habituales
+
+No uses un built-in personalizado como requisito de navegación, lectura o ejercicio básico. No envíes a producción una detección que solo busque `window.customElements`. Tampoco supongas que Shadow DOM se puede adjuntar a cualquier etiqueta nativa por extenderla: hay restricciones de hosts permitidos. Para este botón no necesitamos raíz shadow.
+
+Lit está orientado habitualmente a elementos autónomos basados en `LitElement`. Usar Lit no elimina las restricciones del motor sobre built-ins ni convierte automáticamente `LitElement` en `HTMLButtonElement`. No añadas una jerarquía compleja para forzar ambas bases.
+
+## Resumen y entrevista
+
+Un built-in personalizado extiende el comportamiento de una etiqueta HTML concreta y necesita concordancia entre clase, registro y creación. **Entrevista:** ¿qué significa que `<button is="lab-confirm-button">` se vea como botón? Solo prueba que es un botón; verifica la instancia y el comportamiento añadido antes de concluir que hubo upgrade personalizado.
+
+## Referencias oficiales
+
+- [HTML: customized built-in elements](https://html.spec.whatwg.org/multipage/custom-elements.html#customized-built-in-element).
+- [MDN: tipos y registro](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_custom_elements).
+- [Web Platform DX: soporte por motor](https://web-platform-dx.github.io/web-features-explorer/features/customized-built-in-elements/).
+
+<Progress lessonId="defining-builtins" />
+
+<Navigation current="08-built-ins" end />

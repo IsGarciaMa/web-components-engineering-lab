@@ -1,0 +1,41 @@
+---
+title: 'Native vs Lit Component'
+description: 'El contrato de datos coincide, aunque el momento de actualización difiere.'
+---
+
+import Demo from '../../../../components/defining/demo.astro';
+
+[← Ocho laboratorios del capítulo](/laboratorios/defining-web-components/)
+
+## Objetivo
+
+El contrato de datos coincide, aunque el momento de actualización difiere. Predice el resultado antes de cada acción y compara tu predicción con el texto observable.
+
+## Experimento
+
+<Demo kind="comparacion">
+  <p>
+    El contrato de datos coincide, aunque el momento de actualización difiere.
+  </p>
+</Demo>
+
+## Recorrido reproducible
+
+1. Elige un valor diferente de 35 y actualiza ambos elementos.
+2. Lee los resultados inmediatamente y tras updateComplete.
+3. Compara fuentes: nativo actualiza su output; Lit declara el template.
+4. Activa el token para personalizar ambas implementaciones.
+
+## Buenas prácticas y errores frecuentes
+
+Lit conserva el lifecycle nativo y añade su sistema reactivo; no equivale a otro estándar de elementos. Abre las fuentes del panel para seguir la llamada real. No edites nodos internos de un componente como sustituto de su API pública. Los resultados proceden de operaciones reales; no hay un editor de ejecución arbitraria.
+
+## Accesibilidad y límites
+
+Todos los controles usan elementos nativos, etiquetas y foco visible. Los resultados se presentan en texto; el historial de lifecycle se consulta como lista con scroll y teclado, sin anunciar automáticamente cada fila. Comprueba también zoom, tema y contenido largo. La revisión automática con axe y las pruebas de responsive están preparadas para CI; no sustituyen lectura con tecnología de asistencia.
+
+## Explica lo observado
+
+¿Qué cambió en el objeto o en su contrato y qué solo cambió en su presentación? Describe una prueba que fallaría si el error indicado volviera a aparecer.
+
+[Volver a la lección](/capitulos/02-defining-web-components/07-styling/) · [Referencia oficial](https://lit.dev/docs/components/lifecycle/)

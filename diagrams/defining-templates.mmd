@@ -1,0 +1,5 @@
+flowchart LR
+  T[template.content] -->|cloneNode true| F[Fragmento copia]
+  F -->|textContent| V[Datos de esta instancia]
+  V -->|append| D[Nodos en destino]
+  T -->|otra copia| O[Instancia independiente]

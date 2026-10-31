@@ -1,6 +1,6 @@
 # Web Components Engineering Lab
 
-Academia open source en español para entender Web Components, Lit y las APIs del navegador. El capítulo 01, **Using Web Components**, incorpora siete lecciones completas; los otros diez capítulos conservan su estado pendiente.
+Academia open source en español para entender Web Components, Lit y las APIs del navegador. Los capítulos **Using Web Components** y **Defining Web Components** incorporan siete y nueve lecciones completas; los otros nueve capítulos conservan su estado pendiente.
 
 ## Recorrer la academia
 
@@ -16,7 +16,7 @@ Academia open source en español para entender Web Components, Lit y las APIs de
 - `/ejercicios/contador/`: práctica local, criterios de aceptación y solución razonada.
 - `/guias/recursos/`: Mermaid y presentación Marp.
 
-El progreso cuenta la lección inicial y las siete de PR-01, se activa voluntariamente y permanece en este navegador. Lee los datos de PR-00 sin perder su avance. No se ha iniciado PR-02.
+El progreso cuenta la lección inicial, las siete de PR-01 y las nueve de PR-02, se activa voluntariamente y permanece en este navegador. Lee los datos de PR-00 sin perder su avance. No se ha iniciado PR-03.
 
 ## Ejecutar
 
@@ -72,10 +72,13 @@ docs/adr/                  Decisiones duraderas
 
 ## Estado de entrega
 
-PR-00 está integrada en `main`. PR-01 se desarrolla en `feat/01-using-web-components`, sin commit, push, merge ni despliegue durante esta entrega. Consulta [alcance, validación y límites de PR-01](docs/pr-01-validation.md), [arquitectura](docs/architecture.md) y [el ADR del capítulo](docs/adr/0005-using-web-components.md).
+PR-00 y PR-01 están integradas en main. PR-02 se desarrolla en `feat/02-defining-web-components`: nueve lecciones, ocho laboratorios, nueve diagramas, tres ejercicios con soluciones opcionales y una presentación. No se realiza commit, push, merge ni despliegue sin autorización.
 
-El entorno local sigue siendo macOS 12: los navegadores actuales de Playwright no se pueden instalar aquí. Las pruebas preparadas no se consideran aprobadas hasta ejecutarlas en un sistema compatible. La CI heredada de main falla en E2E; se documentan sus causas y las correcciones en el informe de PR-01.
+- `/capitulos/02-defining-web-components/`: mapa y navegación de las nueve lecciones. La antigua URL del capítulo 02 redirige aquí.
+- `/laboratorios/defining-web-components/`: registro, Shadow DOM, slots, plantillas, lifecycle, atributos, nativo/Lit y debugging.
+- `/ejercicios/defining-web-components/`: contratos, composición y recursos.
+- `/slides/defining-web-components.html`: presentación generada por Marp.
 
-Los resultados de [PR-00](docs/validation.md) son evidencia histórica, no una certificación del capítulo nuevo. La auditoría actual y las limitaciones se registran en el informe de PR-01. No se publica ni se configura hosting adicional.
+El [documento de arquitectura](docs/architecture.md) explica la propiedad de los nodos y la integración. El código fuente del capítulo vive en `src/examples/defining` y `src/labs/defining`; sus pruebas unitarias y E2E acompañan esos contratos.
 
-Licencia [MIT](LICENSE).
+Monterey mantiene su restricción conocida. Las pruebas E2E, accesibilidad de navegador y capturas preparadas no se consideran aprobadas hasta ejecutarse en CI compatible. No se repiten instalaciones de navegadores ni diagnósticos del mismo bloqueo. Los informes de PR-00/PR-01 son evidencia histórica de esas entregas.

@@ -1,0 +1,6 @@
+flowchart LR
+  C[Clase] --> D[Registro define]
+  U[Host existente] --> G[Upgrade del mismo nodo]
+  D --> G
+  D --> N[Nueva instancia]
+  N --> A[Conexión opcional con append]
