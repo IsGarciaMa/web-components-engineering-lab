@@ -18,6 +18,20 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...astro.configs['flat/recommended'],
   {
+    rules: {
+      'no-else-return': ['error', { allowElseIf: false }],
+    },
+  },
+  {
+    files: ['**/*.ts', '**/*.tsx', '**/*.astro'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
+      ],
+    },
+  },
+  {
     files: ['**/*.astro'],
     languageOptions: { parserOptions: { parser: tseslint.parser } },
   },

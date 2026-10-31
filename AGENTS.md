@@ -6,6 +6,7 @@ Web Components Engineering Lab enseña los estándares web y su aplicación con 
 
 - Documentación, contenido y explicaciones en español. Identificadores de código en inglés y terminología técnica precisa.
 - TypeScript estricto; no silencies errores con `any` o casts sin justificar. Prettier es obligatorio. Separa visualmente bloques, conserva funciones pequeñas y nombres coherentes: clases PascalCase, variables camelCase, archivos y Custom Elements kebab-case con prefijo `lab-`.
+- Consulta `code-readability` al desarrollar funcionalidades, corregir errores, refactorizar, implementar TypeScript/Lit, generar ejemplos educativos o revisar una PR. Aplica sus convenciones al código nuevo y a los bloques modificados, sin refactorizaciones masivas para adoptar la Skill.
 - Separa contenido, UI del portal, ejemplos, contratos y herramientas. Prefiere composición; aplica SOLID y patrones solo si resuelven una necesidad real.
 - Distingue APIs del navegador de abstracciones de Lit. Respeta el ciclo de vida, la propiedad de los nodos y los decorators configurados. `render()` es puro; no manipules DOM gestionado por Lit sin una integración justificada.
 - Diseña accesibilidad desde el inicio: semántica, teclado, foco, nombres, contraste y estados de error. Revisa responsive, RTL, reduced motion y forced colors cuando afecten al cambio.
@@ -28,17 +29,18 @@ Antes de entregar ejecuta `pnpm install --frozen-lockfile` y `pnpm check` (Skill
 
 Consulta solo las Skills aplicables según la tabla, antes de implementar o revisar el área correspondiente. Sus procedimientos viven en cada `SKILL.md`; este contrato mantiene únicamente las reglas comunes.
 
-| Skill                 | Activación                                                                         |
-| --------------------- | ---------------------------------------------------------------------------------- |
-| project-scaffolding   | Entorno, dependencias, scripts o configuración inicial                             |
-| frontend-architecture | Límites de módulos, contratos públicos o gestión del estado                        |
-| web-components        | Custom Elements, lifecycle, Shadow/Light DOM, slots, eventos o formularios nativos |
-| lit-engineering       | Reactividad, templates, decorators, controllers o Context de Lit                   |
-| technical-education   | Capítulos, explicaciones, ejemplos, diagramas, ejercicios o presentaciones         |
-| accessibility-ux      | Interacciones, semántica, teclado, foco o adaptaciones visuales                    |
-| quality-engineering   | Estrategia, implementación, ejecución o depuración de pruebas                      |
-| security-performance  | Entradas externas, contenido dinámico, recursos o mediciones de rendimiento        |
-| devops-vercel         | CI, build, caché, previews y preparación de despliegue                             |
-| code-review           | Revisión de diff o PR con hallazgos P0–P3 y evidencias                             |
+| Skill                 | Activación                                                                                   |
+| --------------------- | -------------------------------------------------------------------------------------------- |
+| project-scaffolding   | Entorno, dependencias, scripts o configuración inicial                                       |
+| frontend-architecture | Límites de módulos, contratos públicos o gestión del estado                                  |
+| web-components        | Custom Elements, lifecycle, Shadow/Light DOM, slots, eventos o formularios nativos           |
+| lit-engineering       | Reactividad, templates, decorators, controllers o Context de Lit                             |
+| technical-education   | Capítulos, explicaciones, ejemplos, diagramas, ejercicios o presentaciones                   |
+| accessibility-ux      | Interacciones, semántica, teclado, foco o adaptaciones visuales                              |
+| quality-engineering   | Estrategia, implementación, ejecución o depuración de pruebas                                |
+| security-performance  | Entradas externas, contenido dinámico, recursos o mediciones de rendimiento                  |
+| devops-vercel         | CI, build, caché, previews y preparación de despliegue                                       |
+| code-review           | Revisión de diff o PR con hallazgos P0–P3 y evidencias                                       |
+| code-readability      | Funcionalidades, correcciones, refactorizaciones, TypeScript, Lit, ejemplos y revisión de PR |
 
-Las diez Skills están instaladas en `.agents/skills/<nombre>/SKILL.md` y reconocidas en el catálogo de Codex de la revisión final. No existe un segundo directorio `codex-skills/`. Este entorno mantiene `.agents` en solo lectura. `pnpm skills:check` valida la estructura instalada; el reconocimiento se comprueba por separado en el catálogo de la sesión. Consulta `docs/skills.md` para el estado y la verificación.
+Las once Skills están instaladas en `.agents/skills/<nombre>/SKILL.md`. Las diez originales aparecían en el catálogo de esta sesión; la nueva `code-readability` se ha leído explícitamente y su descubrimiento automático debe comprobarse en una sesión que actualice el catálogo. No existe un segundo directorio `codex-skills/`. Este entorno mantiene `.agents` en solo lectura y requiere elevación para instalar la nueva Skill. `pnpm skills:check` valida la estructura instalada, sin certificar reconocimiento automático. Consulta `docs/skills.md` para el estado y la verificación.
