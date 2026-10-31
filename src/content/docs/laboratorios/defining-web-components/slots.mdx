@@ -1,0 +1,41 @@
+---
+title: 'Slot Composition Playground'
+description: 'Los nodos permanecen en Light DOM; el componente publica un resumen de slotchange.'
+---
+
+import Demo from '../../../../components/defining/demo.astro';
+
+[← Ocho laboratorios del capítulo](/laboratorios/defining-web-components/)
+
+## Objetivo
+
+Los nodos permanecen en Light DOM; el componente publica un resumen de slotchange. Predice el resultado antes de cada acción y compara tu predicción con el texto observable.
+
+## Experimento
+
+<Demo kind="slots">
+  <p>
+    Los nodos permanecen en Light DOM; el componente publica un resumen de
+    slotchange.
+  </p>
+</Demo>
+
+## Recorrido reproducible
+
+1. Retira el título y observa el fallback.
+2. Restaura el span y cambia su texto sin cambiar la asignación.
+3. Consulta asignación y alterna el contenido del slot por defecto.
+
+## Buenas prácticas y errores frecuentes
+
+No clones ni muevas contenido para resolver la proyección. Abre las fuentes del panel para seguir la llamada real. No edites nodos internos de un componente como sustituto de su API pública. Los resultados proceden de operaciones reales; no hay un editor de ejecución arbitraria.
+
+## Accesibilidad y límites
+
+Todos los controles usan elementos nativos, etiquetas y foco visible. Los resultados se presentan en texto; el historial de lifecycle se consulta como lista con scroll y teclado, sin anunciar automáticamente cada fila. Comprueba también zoom, tema y contenido largo. La revisión automática con axe y las pruebas de responsive están preparadas para CI; no sustituyen lectura con tecnología de asistencia.
+
+## Explica lo observado
+
+¿Qué cambió en el objeto o en su contrato y qué solo cambió en su presentación? Describe una prueba que fallaría si el error indicado volviera a aparecer.
+
+[Volver a la lección](/capitulos/02-defining-web-components/03-slots/) · [Referencia oficial](https://developer.mozilla.org/en-US/docs/Web/API/HTMLSlotElement/slotchange_event)

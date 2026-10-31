@@ -1,0 +1,38 @@
+---
+title: '02 · Defining Web Components'
+description: Nueve lecciones para construir Custom Elements nativos, gestionar lifecycle y comparar con Lit.
+tableOfContents: false
+sidebar:
+  order: 2
+  badge:
+    text: Disponible
+    variant: success
+---
+
+import ChapterMap from '../../../components/defining/chapter-map.astro';
+
+<ChapterMap />
+
+## Del consumidor al autor
+
+En PR-01 utilizaste contratos ya definidos. Ahora decidirás cómo construirlos: qué trabajo pertenece al constructor, cómo se transforma una entrada, quién mantiene cada nodo y cuándo se libera un recurso. Al terminar podrás crear un componente autónomo, justificar Shadow DOM, componer con slots y reconocer qué automatiza Lit.
+
+## Antes de empezar
+
+Necesitas HTML, CSS, clases y módulos JavaScript, eventos y DOM básico. Haber completado [Using Web Components](/capitulos/01-using-web-components/) ayuda a reconocer la perspectiva del consumidor. Los ejemplos usan TypeScript estricto; el tipado no sustituye las comprobaciones en ejecución.
+
+## Ruta de trabajo
+
+Lee una lección, predice su experimento y abre el código real. En lifecycle repite conexiones en vez de memorizar una secuencia lineal. Después resuelve los ejercicios sin desplegar su solución. El progreso local sigue siendo voluntario: conserva las lecciones anteriores y permite marcar cada una de las nueve nuevas.
+
+- [Ocho laboratorios funcionales](/laboratorios/defining-web-components/).
+- [Tres ejercicios progresivos](/ejercicios/defining-web-components/).
+- [Presentación Marp · Defining Web Components](/slides/defining-web-components.html).
+
+## Límites deliberados
+
+PR-03 profundizará en atributos, propiedades y contratos. PR-04 ampliará styling; PR-05, composición avanzada. Aquí esos conceptos tienen ejemplos completos de alcance pequeño, suficientes para crear y depurar un primer componente sin adelantar todas las decisiones de los capítulos futuros.
+
+El visualizador usa callbacks reales y un registro acotado. El movimiento preservado y los built-ins personalizados detectan soporte y explican la alternativa. El portal no depende de esas APIs opcionales. La compatibilidad documentada no se presenta como una prueba de navegador ejecutada en este entorno.
+
+Las explicaciones, diagramas y código son originales, basados en [HTML](https://html.spec.whatwg.org/multipage/custom-elements.html), [DOM](https://dom.spec.whatwg.org/) y [Lit](https://lit.dev/docs/components/). El índice de referencia solo delimita temas; no se reproducen materiales privados de BlueSpire.

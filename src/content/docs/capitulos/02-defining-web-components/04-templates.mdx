@@ -1,0 +1,83 @@
+---
+title: 'HTML Templates'
+description: 'Define y verifica HTML Templates: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 4
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/template-stamp.ts?raw';
+import diagram from '../../../../../diagrams/defining-templates.mmd?raw';
+
+<Navigation current="04-templates" />
+
+## Introducción y objetivos
+
+Crear muchos nodos mediante instrucciones repetidas hace difícil reconocer una estructura. Un `HTMLTemplateElement` conserva un fragmento de markup que puedes instanciar cuando lo necesites. No es un sistema reactivo ni una función de Lit.
+
+Aprenderás a distinguir plantilla, fragmento y copia insertada; crearás instancias independientes y separarás estructura confiable de datos dinámicos.
+
+## Funcionamiento
+
+El contenido de `<template>` vive en `template.content`, un `DocumentFragment` separado de los hijos ordinarios de la plantilla. El fragmento no se presenta como UI de la página mientras permanece allí. `cloneNode(true)` crea una copia profunda de sus nodos. Al insertar el fragmento, sus hijos se trasladan al destino; el contenedor fragmento no se convierte en un elemento visible.
+
+<Diagram
+  source={diagram}
+  caption="Clonar conserva la plantilla; insertar el fragmento consume los hijos de esa copia."
+/>
+
+Hay una diferencia crítica entre `target.append(template.content)` y `target.append(template.content.cloneNode(true))`: la primera consume el contenido original. La segunda deja el original disponible para futuras copias. No intentes volver a usar una copia de fragmento ya insertada esperando duplicarla otra vez.
+
+## Laboratorio: datos independientes
+
+<Demo kind="templates">
+  <p>
+    Clona dos títulos distintos y observa que editar el campo no reescribe la
+    primera copia. Prueba un texto con signos de HTML: se presenta como texto.
+    El límite de cinco copias mantiene acotado el experimento.
+  </p>
+</Demo>
+
+<Code code={source} lang="ts" />
+
+El guard de `DocumentFragment` aclara el tipo devuelto por `cloneNode()` sin silenciar TypeScript con un cast. El encabezado se busca dentro de la copia, no en el documento entero; de ese modo cada instancia recibe sus propios datos.
+
+## Diferencias frente a innerHTML
+
+| Operación                          | Qué aporta                                        | Qué debes resolver                                       |
+| ---------------------------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| `createElement` y `append`         | Construcción explícita y asignación de texto      | Mucha estructura puede resultar verbosa                  |
+| `innerHTML`                        | Parseo de una cadena como HTML                    | Confianza de la cadena; reemplazo de nodos y referencias |
+| `template.content.cloneNode(true)` | Reutilización de estructura parseada              | Datos, listeners, IDs e inserción de cada copia          |
+| `html` de Lit                      | Template declarativo con bindings y actualización | Contrato reactivo y propiedad de los nodos por Lit       |
+
+Usamos `innerHTML` una vez con una constante local revisada para definir la plantilla. La entrada del estudiante va a `textContent`, nunca a esa cadena. Meter una cadena externa en `<template>` no la sanitiza: su contenido puede volverse activo al insertarse. La seguridad depende de cómo construyes y utilizas los nodos, no del nombre de la etiqueta.
+
+## Reutilización, costes y límites
+
+Una plantilla evita reescribir la misma estructura y puede evitar parsearla desde cero en cada uso. Esto no prueba una mejora de rendimiento para cualquier caso: tamaño, número de copias, inserción, estilos y trabajo posterior importan. Mide un escenario antes de hacer una afirmación de velocidad.
+
+`cloneNode()` no copia listeners añadidos mediante `addEventListener()`. Asigna listeners a cada instancia o delega desde un contenedor que controles. Evita IDs duplicados; genera identidades o usa referencias locales cuando una relación semántica necesite IDs únicos. Para otro documento, considera `importNode()` y las reglas del documento destino en vez de asumir que todos los contextos son equivalentes.
+
+El Custom Element de referencia es dueño de su lista interna y puede vaciarla con `replaceChildren()`. No se borra un árbol gestionado por Lit. Su API pública `stamp(title)` devuelve si insertó una copia y `reset()` vacía el resultado; el consumidor no necesita conocer el selector del encabezado.
+
+## Lit, resumen y entrevista
+
+Lit no equivale a clonar y reemplazar un `template` manualmente en cada render. Sus templates declarativos actualizan partes según bindings y estado. El elemento HTML `template` y el tag `html` de Lit pertenecen a capas distintas.
+
+**Resumen:** conserva la plantilla original, clona, asigna datos seguros e inserta una copia. **Entrevista:** ¿copiar una estructura copia también su comportamiento? No necesariamente: los listeners registrados mediante JavaScript necesitan una estrategia propia.
+
+## Referencias oficiales
+
+- [MDN: HTMLTemplateElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLTemplateElement).
+- [DOM: cloneNode](https://dom.spec.whatwg.org/#dom-node-clonenode).
+- [HTML: template](https://html.spec.whatwg.org/multipage/scripting.html#the-template-element).
+- [Lit: templates](https://lit.dev/docs/templates/overview/).
+
+<Progress lessonId="defining-templates" />
+
+<Navigation current="04-templates" end />

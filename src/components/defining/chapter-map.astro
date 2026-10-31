@@ -1,0 +1,54 @@
+---
+import {
+  definingLessons,
+  definingLessonHref,
+} from '../../data/defining-web-components';
+---
+
+<div class="using-chapter not-content">
+  <p class="eyebrow">CAPÍTULO 02 · DISPONIBLE · 9 LECCIONES</p>
+  <p class="page-lead">
+    De consumidor a autor. Construye elementos autónomos, distribuye contenido y
+    razona sobre conexiones reales. Compara el control manual con el sistema
+    reactivo de Lit.
+  </p>
+  <div class="using-chapter-meta">
+    <span>255 min de lectura y práctica orientativos</span><span
+      >8 laboratorios</span
+    ><span>3 ejercicios progresivos</span>
+  </div>
+  <div class="hero-actions">
+    <a
+      class="lab-button primary"
+      href={definingLessonHref(definingLessons[0].slug)}
+      >Empezar el capítulo →</a
+    ><a
+      class="lab-button secondary"
+      href="/laboratorios/defining-web-components/">Explorar laboratorios</a
+    >
+  </div>
+  <ol class="using-lesson-grid">
+    {
+      definingLessons.map((lesson, index) => (
+        <li>
+          <>
+            <span class="chapter-number">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div>
+              <>
+                <h2>
+                  <a href={definingLessonHref(lesson.slug)}>{lesson.title}</a>
+                </h2>
+                <p>{lesson.outcome}</p>
+                <span class="section-note">
+                  {lesson.minutes} min · explicación, demo y autoevaluación
+                </span>
+              </>
+            </div>
+          </>
+        </li>
+      ))
+    }
+  </ol>
+</div>

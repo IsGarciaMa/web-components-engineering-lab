@@ -1,0 +1,7 @@
+flowchart LR
+  B[HTMLButtonElement] --> C[ConfirmButton]
+  C --> D[define con extends button]
+  D --> I[button con is]
+  I --> S{Instancia soportada}
+  S -->|Sí| E[Comportamiento añadido]
+  S -->|No| F[Alternativa nativa]

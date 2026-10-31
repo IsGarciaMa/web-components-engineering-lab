@@ -8,6 +8,7 @@ export default defineConfig({
   markdown: { processor: satteri({ hastPlugins: [keyboardRegions] }) },
   trailingSlash: 'always',
   redirects: {
+    '/capitulos/02-custom-elements/': '/capitulos/02-defining-web-components/',
     '/capitulos/01-plataforma-web/': '/capitulos/01-using-web-components/',
   },
   integrations: [
@@ -51,8 +52,21 @@ export default defineConfig({
                 },
               ],
             },
+            {
+              label: '02 · Defining Web Components',
+              items: [
+                {
+                  slug: 'capitulos/02-defining-web-components',
+                  label: 'Mapa del capítulo',
+                },
+                {
+                  autogenerate: {
+                    directory: 'capitulos/02-defining-web-components',
+                  },
+                },
+              ],
+            },
             ...[
-              '02-custom-elements',
               '03-atributos-propiedades',
               '04-shadow-dom',
               '05-slots-composicion',

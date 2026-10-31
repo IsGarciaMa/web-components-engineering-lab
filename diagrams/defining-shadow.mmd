@@ -1,0 +1,6 @@
+flowchart TD
+  H[Host] --> L[Hijos Light DOM]
+  H --> S[ShadowRoot]
+  S --> I[Nodos internos]
+  S --> T[Slot]
+  L -. Asignación .-> T

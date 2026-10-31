@@ -1,3 +1,4 @@
+import { definingLessons, definingLessonHref } from './defining-web-components';
 import { usingLessons, usingLessonHref } from './using-web-components';
 
 export type EditorialStatus = 'pending' | 'available' | 'in-progress';
@@ -33,11 +34,12 @@ export const chapters: readonly Chapter[] = [
     ],
   },
   {
-    slug: '02-custom-elements',
-    title: 'Custom Elements y ciclo de vida',
-    description: 'Da identidad y comportamiento a tus propios elementos HTML.',
+    slug: '02-defining-web-components',
+    title: 'Defining Web Components',
+    description:
+      'Define componentes nativos y compara sus responsabilidades con Lit.',
     stage: 'Estándares web',
-    status: 'pending',
+    status: 'available',
     objectives: [
       'Registrar un elemento con una API pública.',
       'Gestionar conexión, desconexión y upgrade.',
@@ -159,5 +161,10 @@ export const publishedLessons = [
     id: lesson.id,
     title: lesson.title,
     href: usingLessonHref(lesson.slug),
+  })),
+  ...definingLessons.map((lesson) => ({
+    id: lesson.id,
+    title: lesson.title,
+    href: definingLessonHref(lesson.slug),
   })),
 ];

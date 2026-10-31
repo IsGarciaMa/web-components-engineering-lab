@@ -1,0 +1,38 @@
+---
+title: 'Attribute & Property Inspector'
+description: 'Conversión, reflexión y representación son decisiones del contrato.'
+---
+
+import Demo from '../../../../components/defining/demo.astro';
+
+[← Ocho laboratorios del capítulo](/laboratorios/defining-web-components/)
+
+## Objetivo
+
+Conversión, reflexión y representación son decisiones del contrato. Predice el resultado antes de cada acción y compara tu predicción con el texto observable.
+
+## Experimento
+
+<Demo kind="atributos">
+  <p>Conversión, reflexión y representación son decisiones del contrato.</p>
+</Demo>
+
+## Recorrido reproducible
+
+1. Escribe 250 como atributo: compara texto raw y getter normalizado.
+2. Asigna 250 como propiedad: ahora el setter serializa 100.
+3. Elimina value y aplica muted="false": presencia booleana sigue siendo true.
+
+## Buenas prácticas y errores frecuentes
+
+No vuelvas a escribir sin guard desde el mismo callback de atributo. Abre las fuentes del panel para seguir la llamada real. No edites nodos internos de un componente como sustituto de su API pública. Los resultados proceden de operaciones reales; no hay un editor de ejecución arbitraria.
+
+## Accesibilidad y límites
+
+Todos los controles usan elementos nativos, etiquetas y foco visible. Los resultados se presentan en texto; el historial de lifecycle se consulta como lista con scroll y teclado, sin anunciar automáticamente cada fila. Comprueba también zoom, tema y contenido largo. La revisión automática con axe y las pruebas de responsive están preparadas para CI; no sustituyen lectura con tecnología de asistencia.
+
+## Explica lo observado
+
+¿Qué cambió en el objeto o en su contrato y qué solo cambió en su presentación? Describe una prueba que fallaría si el error indicado volviera a aparecer.
+
+[Volver a la lección](/capitulos/02-defining-web-components/06-atributos/) · [Referencia oficial](https://lit.dev/docs/components/properties/)

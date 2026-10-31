@@ -1,0 +1,9 @@
+flowchart TD
+  C[Construcción o upgrade] --> I[Instancia]
+  I --> A[Cambio de atributo observado]
+  I --> N[Conectar]
+  N --> R[Adquirir recursos]
+  R --> D[Desconectar]
+  D --> L[Liberar recursos]
+  L --> N
+  I --> O[Adoptar en otro Document]

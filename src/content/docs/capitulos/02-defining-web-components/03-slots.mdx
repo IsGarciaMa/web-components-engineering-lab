@@ -1,0 +1,84 @@
+---
+title: 'Slot Composition'
+description: 'Define y verifica Slot Composition: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 3
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/slot-card.ts?raw';
+import diagram from '../../../../../diagrams/defining-slots.mmd?raw';
+
+<Navigation current="03-slots" />
+
+## Introducción y objetivos
+
+Un componente compuesto suele necesitar estructura interna estable y contenido elegido por su consumidor. Los slots permiten presentar ese contenido dentro del árbol renderizado sin clonar sus nodos ni transferir su propiedad al componente.
+
+Aprenderás a distribuir contenido por nombre, distinguir fallback de ausencia de texto y consultar la asignación. Reservamos las reglas avanzadas del árbol compuesto y retargeting para PR-05.
+
+## Funcionamiento y propiedad de los nodos
+
+El slot sin `name` recibe contenido asignable sin nombre; un slot con `name="title"` recibe hijos del host cuyo atributo `slot` sea `title`. El contenido escrito dentro del propio `<slot>` sirve como fallback cuando no hay nodos asignados. Los nodos del consumidor siguen siendo hijos Light DOM del host, aunque se presenten en la posición del slot.
+
+<Diagram
+  source={diagram}
+  caption="La asignación compone la presentación sin convertir el span del consumidor en un hijo del ShadowRoot."
+/>
+
+```html
+<lab-slot-card>
+  <span slot="title">Título del consumidor</span>
+  <p>Contenido principal</p>
+</lab-slot-card>
+```
+
+El `span` no pasa a ser hijo del slot: conserva su `parentNode`. Un listener o una referencia que tenía el consumidor sigue apuntando al mismo objeto. Los estilos y eventos tienen reglas de composición que estudiaremos más adelante; no deduzcas su comportamiento simplemente mirando dónde se dibuja el texto.
+
+## Laboratorio: asignación frente a mutación
+
+<Demo kind="slots">
+  <p>
+    Retira el título para mostrar el fallback. Después restaura el título y
+    cambia solo su texto: compara el contador de slotchange. Consulta
+    assignedNodes y assignedElements sin modificar los nodos.
+  </p>
+</Demo>
+
+<Code code={source} lang="ts" />
+
+### Qué inspeccionan las APIs
+
+`assignedNodes()` devuelve nodos asignados, incluidos nodos de texto. `assignedElements()` filtra elementos. La opción `{ flatten: true }` permite resolver asignaciones a través de slots y fallback en situaciones que exceden este primer ejemplo. Sin ella, una lista de asignación vacía no significa que no se vea nada: puede estar activo el fallback.
+
+El whitespace también puede ser un nodo de texto asignado al slot por defecto. Una línea con espacios puede impedir el fallback aunque visualmente parezca vacía. En esta demo las interpolaciones no añaden texto de separación entre hijos para que la retirada permita observarlo de forma predecible. No sustituyas una comprobación de nodos por `textContent.length` si el contrato acepta elementos sin texto, como imágenes.
+
+### Qué comunica slotchange
+
+`slotchange` avisa de cambios de asignación; no es un observador general de todo lo que ocurra dentro de cada nodo proyectado. Cambiar el texto de un descendiente del mismo `span` mantiene el nodo asignado. Añadir o retirar ese `span` cambia la distribución. El componente escucha el evento en su raíz y publica `composition-change` con un resumen: ese segundo evento es un contrato de esta demo, no una API nativa adicional. [Referencia de slotchange](https://developer.mozilla.org/en-US/docs/Web/API/HTMLSlotElement/slotchange_event).
+
+## Buenas prácticas y errores habituales
+
+Documenta los nombres aceptados y qué es opcional. Un error tipográfico como `slot="heading"` puede dejar el nodo sin presentar y mantener el fallback del título. El laboratorio de depuración reproduce ese fallo sin borrar contenido.
+
+No uses `append()` para mover los hijos del consumidor a tu raíz; destruyes la relación que slots estaban resolviendo. No copies `innerHTML` de los hijos para actualizarlos ni introduzcas observers globales para inferir asignaciones que el navegador ya notifica. Si necesitas observar el contenido interno de un hijo, establece un contrato distinto y justifica su coste.
+
+## Lit, resumen y entrevista
+
+Lit renderiza `<slot>` usando la misma API del navegador. Para componer otros componentes, usa bindings y contenido hijo en el template; no manipules sus nodos por detrás de Lit. El evento `slotchange` sigue siendo nativo.
+
+**Resumen:** asignar no es mover ni clonar. **Entrevista:** ¿por qué puede cambiar el texto mostrado sin un nuevo `slotchange`? Porque mutó un descendiente del mismo nodo asignado, sin variar la asignación.
+
+## Referencias oficiales
+
+- [HTML: el elemento slot](https://html.spec.whatwg.org/multipage/scripting.html#the-slot-element).
+- [MDN: templates y slots](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_templates_and_slots).
+- [MDN: slotchange](https://developer.mozilla.org/en-US/docs/Web/API/HTMLSlotElement/slotchange_event).
+
+<Progress lessonId="defining-slots" />
+
+<Navigation current="03-slots" end />

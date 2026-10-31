@@ -1,0 +1,7 @@
+flowchart LR
+  P[Setter property] --> G{Texto diferente}
+  G -->|Sí| A[setAttribute]
+  E[Mutación externa] --> A
+  A --> C[attributeChangedCallback]
+  C --> R[Actualizar vista]
+  A --> V[Getter interpreta atributo]

@@ -1,0 +1,84 @@
+---
+title: 'Shadow DOM'
+description: 'Define y verifica Shadow DOM: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 2
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/shadow-frames.ts?raw';
+import diagram from '../../../../../diagrams/defining-shadow.mmd?raw';
+
+<Navigation current="02-shadow-dom" />
+
+## Introducción y objetivos
+
+Una etiqueta nueva puede usar solo Light DOM. Shadow DOM es una decisión adicional: crea una raíz asociada al host para estructurar una implementación con límites de consulta y estilo. Es útil en un componente distribuido entre aplicaciones con CSS distinto; puede resultar innecesario para mejorar un fragmento editorial que debe participar en las reglas del sitio.
+
+Aprenderás a crear una raíz, reconocer sus nodos y elegir entre `open`, `closed` o ausencia de Shadow DOM. Debes poder explicar qué encapsula y qué sigue compartido con el documento.
+
+## Funcionamiento: host, raíz y árboles
+
+`host.attachShadow({ mode: 'open' })` devuelve un `ShadowRoot`. Desde ese momento el componente puede insertar ahí su UI. Los hijos normales del host siguen siendo Light DOM; no se trasladan automáticamente a la raíz. Si quieres que se vean como contenido compuesto, proporciona slots.
+
+<Diagram
+  source={diagram}
+  caption="La raíz shadow pertenece al host; los hijos Light DOM siguen siendo nodos del consumidor."
+/>
+
+Una consulta como `document.querySelector('p')` no entra automáticamente en todas las raíces shadow. Para una raíz abierta puedes consultar `host.shadowRoot?.querySelector('p')`. Esa consulta explícita sirve para depurar; en una integración de producto prefiere la API pública para no acoplar al consumidor a la estructura interna.
+
+## Open y closed
+
+| Modo     | Resultado de `host.shadowRoot` | Consecuencia para un consumidor       |
+| -------- | ------------------------------ | ------------------------------------- |
+| `open`   | Referencia al `ShadowRoot`     | Puede inspeccionarlo mediante esa API |
+| `closed` | `null`                         | Esa API no expone la raíz             |
+| Sin raíz | `null`                         | El componente puede usar Light DOM    |
+
+El método `attachShadow()` devuelve la raíz también en modo `closed`; el autor podría conservarla. Por tanto, `null` no demuestra ausencia de raíz. Tampoco promete confidencialidad: código que controla el entorno, extensiones o herramientas de desarrollo no quedan sujetos a una frontera de seguridad por esta opción. No guardes secretos en nodos internos. [MDN explica el límite de acceso de ambos modos](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
+
+## Laboratorio: consulta frente a apariencia
+
+<Demo kind="shadow">
+  <p>
+    Inspecciona las raíces y alterna el token heredado. El párrafo exterior
+    recibe un selector del laboratorio; los párrafos internos conservan sus
+    reglas. Las dos raíces siguen mostrando contenido aunque una no se exponga
+    mediante shadowRoot.
+  </p>
+</Demo>
+
+<Code code={source} lang="ts" />
+
+## CSS, herencia y accesibilidad
+
+Los selectores ordinarios del documento no atraviesan la raíz para seleccionar sus párrafos. Propiedades heredadas como `font-family` y tokens CSS sí pueden pasar del host a sus descendientes. El host sigue siendo seleccionable desde fuera; la página puede cambiar su tamaño, márgenes o variables públicas. Encapsulación no significa aislamiento visual total.
+
+Tampoco transforma automáticamente el componente en un widget accesible. Un botón nativo dentro de la raíz conserva su interacción, pero el autor debe revisar nombres, foco, contraste y relaciones semánticas. Una referencia ARIA por ID entre árboles no debe darse por válida sin comprobar sus reglas. Diseña controles autocontenidos y prueba el comportamiento real.
+
+## Elegir y evitar errores
+
+Usa una raíz cuando quieras separar la implementación interna y ofrecer personalización deliberada. Mantén Light DOM si el componente mejora contenido que debe recibir estilos globales o si no necesitas encapsulación. Documenta quién crea y actualiza cada nodo. No añadas una raíz solo porque la clase sea un Custom Element.
+
+Crear una segunda raíz de forma indiscriminada al reconectar es un error: la construcción y la conexión tienen responsabilidades distintas. También lo es escribir `host.innerHTML` esperando cambiar la UI interna, o tratar `closed` como defensa contra XSS. La demo no necesita acceder directamente a una raíz closed para demostrar su existencia: la UI renderizada y la consulta son observaciones diferentes.
+
+## Lit, resumen y entrevista
+
+Por defecto Lit crea una raíz shadow y usa `static styles` para sus estilos. Sobrescribir `createRenderRoot()` para renderizar en Light DOM es posible, pero cambia el contrato de encapsulación y exige revisar estilos y composición. No lo hagas solo para que un selector externo pueda alcanzar una implementación privada.
+
+**Resumen:** Shadow DOM define un árbol de implementación con límites concretos; decide su uso por el contrato. **Entrevista:** si `shadowRoot` es `null`, ¿puedes asegurar que el componente no usa Shadow DOM? No: puede tener una raíz closed.
+
+## Referencias oficiales
+
+- [MDN: usar Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
+- [DOM: árboles shadow](https://dom.spec.whatwg.org/#shadow-trees).
+- [Lit: Shadow DOM](https://lit.dev/docs/components/shadow-dom/).
+
+<Progress lessonId="defining-shadow" />
+
+<Navigation current="02-shadow-dom" end />

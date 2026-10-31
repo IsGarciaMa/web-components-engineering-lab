@@ -1,0 +1,60 @@
+---
+import LabPanel from '../using/lab-panel.astro';
+import {
+  definingLabs,
+  type DefiningLabKind,
+} from '../../data/defining-web-components';
+interface Props {
+  kind: DefiningLabKind;
+}
+const { kind } = Astro.props;
+const lab = definingLabs.find((item) => item.slug === kind);
+if (!lab) {
+  throw new Error(`Laboratorio desconocido: ${kind}`);
+}
+const sources = import.meta.glob<string>(
+  ['../../labs/defining/*.ts', '../../examples/defining/*.ts'],
+  { query: '?raw', import: 'default', eager: true },
+);
+const sourcePaths = [
+  `../../labs/defining/${lab.module}.ts`,
+  `../../examples/defining/${lab.example}.ts`,
+  ...(kind === 'comparacion'
+    ? ['../../examples/defining/native-meter.ts']
+    : []),
+  ...(kind === 'debugging' ? ['../../examples/defining/slot-card.ts'] : []),
+];
+const code = sourcePaths.map((path) => {
+  const source = sources[path];
+  if (!source) {
+    throw new Error(`Fuente ausente: ${path}`);
+  }
+  return { label: path.split('/').at(-1) ?? path, code: source };
+});
+const tags: Record<DefiningLabKind, string> = {
+  registro: 'lab-registration-lab',
+  shadow: 'lab-shadow-lab',
+  slots: 'lab-slots-lab',
+  templates: 'lab-template-lab',
+  lifecycle: 'lab-lifecycle-lab',
+  atributos: 'lab-attributes-lab',
+  comparacion: 'lab-comparison-lab',
+  debugging: 'lab-debugging-lab',
+};
+const Tag = tags[kind];
+---
+
+<LabPanel title={lab.title} objective={lab.objective} sources={code}>
+  <Tag />
+  <div slot="explanation"><slot /></div>
+</LabPanel>
+<script>
+  import '../../labs/defining/registration-lab';
+  import '../../labs/defining/shadow-lab';
+  import '../../labs/defining/slots-lab';
+  import '../../labs/defining/template-lab';
+  import '../../labs/defining/lifecycle-lab';
+  import '../../labs/defining/attributes-lab';
+  import '../../labs/defining/comparison-lab';
+  import '../../labs/defining/debugging-lab';
+</script>

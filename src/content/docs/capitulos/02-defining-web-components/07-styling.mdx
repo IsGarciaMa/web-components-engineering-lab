@@ -1,0 +1,100 @@
+---
+title: 'Styling'
+description: 'Define y verifica Styling: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 7
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/lit-meter.ts?raw';
+import diagram from '../../../../../diagrams/defining-styling.mmd?raw';
+
+<Navigation current="07-styling" />
+
+## Introducción y objetivos
+
+El autor de un componente decide tanto su apariencia por defecto como los puntos que podrá personalizar el consumidor. Shadow DOM permite proteger estructura interna, pero un componente rígido que ignora la tipografía y los temas de su aplicación no es necesariamente más reutilizable.
+
+Aprenderás a separar estilos internos de API visual, usar `:host` y variables heredadas, y reconocer cuándo una hoja construible aporta valor. El styling avanzado y los detalles de cascada se reservan para PR-04.
+
+## Estilos internos y host
+
+Un `<style>` dentro de la raíz puede seleccionar nodos internos sin afectar a párrafos ajenos. `:host` selecciona el host desde esa hoja. `:host([muted])` permite expresar un estado del host como borde discontinuo, sin depender solo del color. El host sigue sujeto a reglas externas; no lo trates como una caja completamente aislada.
+
+<Diagram
+  source={diagram}
+  caption="El consumidor configura el token; cada implementación decide cómo usarlo en su hoja interna."
+/>
+
+No escribas `lab-native-meter p` desde el documento esperando seleccionar párrafos internos. Ese selector busca descendientes del árbol consultado, no cruza por sí mismo una raíz shadow. En cambio, una propiedad heredada puede llegar a esos nodos a través del host. Una variable como `--meter-accent` funciona como punto público de personalización, porque la hoja interna decide consultarla.
+
+## Laboratorio y comparación de código
+
+<Demo kind="comparacion">
+  <p>
+    Actualiza ambos medidores. Compara la actualización manual inmediata con el
+    resultado tras updateComplete. En DevTools configura --meter-accent en cada
+    host para probar la misma API visual sin editar sus nodos internos.
+  </p>
+</Demo>
+
+<Code code={source} lang="ts" />
+
+```css
+lab-native-meter,
+lab-lit-meter {
+  --meter-accent: #1b5d72;
+  margin-block: 1rem;
+}
+```
+
+Ese color es un ejemplo que debes comprobar sobre el fondo real; no es un token universal de contraste. En el portal se heredan los tokens del tema y se preserva el borde como señal de estado. Un token global puede heredarse a muchas instancias; una declaración local en el host permite una variante concreta.
+
+## Hojas construibles
+
+Para compartir una hoja entre raíces del mismo documento, puedes crear un `CSSStyleSheet`, rellenarlo con `replaceSync()` y adoptarlo mediante `root.adoptedStyleSheets`. Evita reconstruirlo por cada actualización si su contenido es estático. La adopción tiene condiciones relativas al documento; si tus componentes se adoptan entre documentos, debes revisarlas.
+
+```ts
+const sheet = new CSSStyleSheet();
+sheet.replaceSync(':host { display: block; }');
+// root es un ShadowRoot creado por este componente.
+root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet];
+```
+
+Es un fragmento de API, no la implementación usada por nuestros medidores. Estos usan `<style>` nativo y `static styles` de Lit respectivamente. [La referencia de replaceSync](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/replaceSync) detalla restricciones: una hoja construida no convierte CSS externo en confiable y `@import` no es una estrategia de carga dentro de esa llamada.
+
+## Qué simplifica Lit
+
+| Responsabilidad             | Nativo                                    | Lit                                           |
+| --------------------------- | ----------------------------------------- | --------------------------------------------- |
+| Crear contenido interno     | Nodos DOM explícitos                      | Template declarativo                          |
+| Estilos estáticos           | Hoja/nodo style administrado por el autor | `static styles` y soporte interno de adopción |
+| Cambios de datos            | Callback y actualización manual           | Accessor reactivo y actualización agrupada    |
+| Rango de value              | Normalización del autor                   | Normalización del autor                       |
+| Registro y lifecycle nativo | API del navegador                         | La misma API bajo LitElement                  |
+
+Contar líneas no basta para decidir. El medidor nativo es pequeño y da control directo; Lit reduce el código de mantenimiento de templates y sincronización al crecer la UI, a cambio de una dependencia y un modelo asíncrono que el equipo debe conocer. Ninguna opción libera de diseñar contratos ni accesibilidad.
+
+## Buenas prácticas y errores habituales
+
+Publica pocos tokens con significado estable, documenta sus valores por defecto y evita exponer cada detalle interno. Usa `:host()` para estados del host, no para perseguir selectores arbitrarios de la aplicación. Una variable privada y un token documentado no tienen el mismo compromiso de compatibilidad.
+
+No generes `unsafeCSS` con la entrada del laboratorio ni desactives encapsulación para aplicar un tema. No prometas rendimiento superior por usar hojas compartidas sin medir un caso. Las partes CSS y los límites de personalización se introdujeron en [PR-01](/capitulos/01-using-web-components/03-personalizacion/); aquí nos centramos en las responsabilidades del autor.
+
+## Resumen y entrevista
+
+La hoja interna describe la implementación; los tokens documentados describen una API de personalización. **Entrevista:** ¿por qué heredar un token no rompe la encapsulación? Porque la raíz decide dónde consumirlo; el selector del consumidor no está seleccionando sus nodos internos.
+
+## Referencias oficiales
+
+- [CSS Scoping: host](https://drafts.csswg.org/css-scoping/#host-selector).
+- [MDN: replaceSync](https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/replaceSync).
+- [Lit: estilos](https://lit.dev/docs/components/styles/).
+
+<Progress lessonId="defining-styling" />
+
+<Navigation current="07-styling" end />

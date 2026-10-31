@@ -1,0 +1,96 @@
+---
+title: 'Debugging Web Components'
+description: 'Define y verifica Debugging Web Components: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 9
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/slot-card.ts?raw';
+import diagram from '../../../../../diagrams/defining-debugging.mmd?raw';
+
+<Navigation current="09-debugging" />
+
+## Introducción y objetivos
+
+Depurar empieza por identificar qué contrato está fallando. Una etiqueta puede existir sin definición, una definición puede estar registrada sin que la UI esté actualizada y un contenido puede estar en el Light DOM sin asignarse a ningún slot. Si lo llamas todo «el componente no funciona», pierdes el punto donde puedes observar el fallo.
+
+Aprenderás un recorrido reproducible de registro, instancia, árbol, entradas, reacciones y recursos. Usarás breakpoints y resultados observables antes de modificar código.
+
+## Un mapa de diagnóstico
+
+<Diagram
+  source={diagram}
+  caption="Cada paso comprueba una frontera distinta antes de cambiar la implementación."
+/>
+
+| Síntoma                                 | Primera comprobación                         | Posible causa                                                |
+| --------------------------------------- | -------------------------------------------- | ------------------------------------------------------------ |
+| No hay comportamiento                   | `customElements.get(name)`                   | Módulo no importado o registro no ejecutado                  |
+| Nombre registrado, instancia inesperada | `element instanceof Constructor`             | Árbol desconectado aún sin upgrade o conflicto de definición |
+| Atributo cambia, vista no               | `observedAttributes` y callback              | Nombre no observado o conversión no implementada             |
+| Título desaparece                       | `slot` y `assignedNodes()`                   | Nombre de slot distinto o whitespace que oculta fallback     |
+| Efecto se duplica al reinsertar         | Contador de señales y breakpoint de conexión | Listeners externos repetidos                                 |
+| Lit no refleja aún el cambio            | `await element.updateComplete`               | Actualización asíncrona todavía pendiente                    |
+
+## Laboratorio: reproducir antes de corregir
+
+<Demo kind="debugging">
+  <p>
+    El fallo de slot está presente desde el inicio. Identifica el nombre
+    esperado, alterna la corrección y compara la asignación. El error de
+    registro duplicado se captura como dato: no se oculta ni contamina la
+    consola como fallo inesperado.
+  </p>
+</Demo>
+
+<Code code={source} lang="ts" />
+
+### Guía práctica en DevTools
+
+1. Abre el panel Elements y selecciona `lab-slot-card`. Su hijo con `slot="heading"` existe aunque no se presente como título. Expande `#shadow-root` y localiza el slot `name="title"`.
+2. En la consola usa una referencia al host seleccionado. En Chromium suele estar disponible `$0`, una ayuda de DevTools que no pertenece al estándar web. Si tu herramienta no la ofrece, selecciona explícitamente el host desde el árbol correspondiente; `document.querySelector` no atraviesa la raíz del laboratorio.
+3. Compara el atributo del hijo con `host.shadowRoot.querySelector('slot[name="title"]').assignedElements()`. No borres ni clones el hijo para «arreglar» el resultado.
+4. Pulsa Alternar corrección del slot. El mismo contrato ahora distribuye el título; consulta el código real y observa qué cambió.
+5. Activa un breakpoint de excepciones capturadas y pulsa Capturar registro duplicado. Inspecciona `NotSupportedError` y la definición existente. Desactiva ese breakpoint cuando termine el experimento para no detener otras excepciones manejadas del portal.
+
+## Registro e identidad
+
+`get(name)` contesta si existe una definición, no si un componente concreto terminó tareas externas. `whenDefined(name)` permite esperar la definición sin una pausa arbitraria. Si el nodo está en un fragmento, usa el [laboratorio de upgrade](/laboratorios/defining-web-components/registro/) para comprobar la diferencia entre definición e instancia.
+
+Un guard de registro puede ocultar un conflicto de versiones. Compara el constructor real y el módulo que debería registrarlo. No arregles un duplicado renombrando componentes en cada ejecución: acabarías acumulando definiciones irreversibles y un problema de empaquetado seguiría sin resolver.
+
+## Lifecycle y listeners: prueba reproducible
+
+Abre el [Lifecycle Visualizer](/laboratorios/defining-web-components/lifecycle/). Coloca breakpoints en conexión y desconexión desde Sources, usando sourcemaps en desarrollo cuando estén disponibles. Conecta, emite una señal y anota el incremento. Desconecta y emite otra: no debe aumentar. Reconecta y emite una sola vez: debe sumar exactamente uno.
+
+Esta secuencia detecta comportamiento incorrecto sin depender de una herramienta exclusiva de un navegador. Los paneles de Event Listeners y los perfiles de memoria pueden aportar más evidencia; no concluyas una fuga solo porque un objeto aparece una vez en un snapshot. Busca retención y crecimiento repetible bajo un escenario concreto.
+
+Para un observer o temporizador sigue la misma pregunta: quién lo crea, qué condición lo mantiene útil y quién lo cancela. No invocar callbacks manualmente es crucial: registrarías reacciones que el navegador nunca produjo.
+
+## Atributos, propiedades y eventos
+
+Inspecciona tanto `getAttribute('value')` como `.value` en el medidor: son superficies distintas. Distingue la entrada raw de su interpretación. Para eventos, coloca un breakpoint en el handler y revisa `target`, `currentTarget` y `detail`; no supongas que la propagación atraviesa cualquier raíz por el nombre del evento. Los contratos de comunicación se profundizarán en su capítulo.
+
+En Lit espera el ciclo apropiado antes de leer el resultado y conserva `render()` puro. Cambiar estado desde un breakpoint no vuelve válidas mutaciones manuales de los nodos que Lit controla. Las regiones montadas imperativamente de nuestros labs están vacías en el template y su propiedad está documentada; la UI restante la controla Lit.
+
+## Buenas prácticas, resumen y entrevista
+
+Reduce el fallo a una operación y una observación. Mantén los errores esperados capturados y visibles; los errores inesperados de consola deben fallar en E2E. Nunca «soluciones» un test ampliando reintentos o borrando una aserción sin demostrar que el contrato cambió.
+
+**Resumen:** distingue definición, identidad, conexión, distribución y actualización. **Entrevista:** si el título está en el DOM pero no se ve, ¿qué comprobarías antes de reescribir render? El contrato de slots, los nodos asignados y los límites de consulta de la raíz.
+
+## Referencias oficiales
+
+- [Chrome DevTools: depurar JavaScript](https://developer.chrome.com/docs/devtools/javascript/).
+- [Firefox DevTools: inspector](https://firefox-source-docs.mozilla.org/devtools-user/page_inspector/).
+- [WHATWG: Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html).
+- [Lit: ciclo de actualización](https://lit.dev/docs/components/lifecycle/).
+
+<Progress lessonId="defining-debugging" />
+
+<Navigation current="09-debugging" end />

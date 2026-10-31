@@ -1,0 +1,30 @@
+---
+title: Laboratorios de Defining Web Components
+description: Ocho experimentos reales sobre registro, árboles, composición, lifecycle y reactividad.
+tableOfContents: false
+---
+
+import { definingLabs } from '../../../data/defining-web-components';
+
+<p class="page-lead">
+  Construye una predicción y compruébala con APIs del navegador. Los
+  experimentos tienen código fuente real y entradas acotadas.
+</p>
+
+<div class="using-lab-grid not-content">
+  {definingLabs.map((lab, index) => (
+    <a href={`/laboratorios/defining-web-components/${lab.slug}/`}>
+      <span class="eyebrow">LAB {String(index + 1).padStart(2, '0')}</span>
+      <h2>{lab.title}</h2>
+      <p>{lab.objective}</p>
+    </a>
+  ))}
+</div>
+
+## Experimento principal
+
+Empieza por [Lifecycle Visualizer](/laboratorios/defining-web-components/lifecycle/) si necesitas comprender recursos y reconexión. El historial acotado contiene solo callbacks ejecutados; una señal de prueba permite demostrar que el listener externo se retira al desconectar. La adopción usa un documento inerte real.
+
+No existe desregistro de nombres: para repetir un registro tardío desde cero recarga la página. El movimiento preservado y el built-in opcional muestran su disponibilidad en el navegador; el resto del portal sigue funcionando sin esas APIs.
+
+[Mapa del capítulo](/capitulos/02-defining-web-components/) · [Ejercicios](/ejercicios/defining-web-components/)

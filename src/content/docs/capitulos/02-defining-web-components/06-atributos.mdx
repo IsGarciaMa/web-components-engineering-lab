@@ -1,0 +1,89 @@
+---
+title: 'Observed Attributes'
+description: 'Define y verifica Observed Attributes: fundamentos, código real y decisiones de ingeniería.'
+sidebar:
+  order: 6
+---
+
+import Navigation from '../../../../components/defining/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/defining/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/defining/native-meter.ts?raw';
+import diagram from '../../../../../diagrams/defining-attributes.mmd?raw';
+
+<Navigation current="06-atributos" />
+
+## Introducción y objetivos
+
+Observar atributos convierte un cambio de markup en una entrada del componente. No convierte automáticamente cadenas en datos de dominio ni mantiene sincronizadas todas las propiedades. El autor debe definir qué valores acepta y cuál es la fuente de verdad.
+
+Aprenderás a observar nombres concretos, gestionar valores iniciales y eliminación, diseñar booleanos por presencia y evitar ciclos de reflexión. PR-03 ampliará contratos y conversiones avanzadas; aquí implementamos uno pequeño y completo.
+
+## Funcionamiento
+
+`static observedAttributes = ['value', 'muted']` establece los nombres que interesan. El navegador llama a `attributeChangedCallback(name, oldValue, newValue)` para sus reacciones. Los argumentos son cadenas o `null`: al añadir, el anterior puede ser `null`; al eliminar, el nuevo es `null`. Cambios hechos por código del propio componente también pueden disparar la reacción; no existe un indicador nativo que los clasifique como internos o externos.
+
+<Diagram
+  source={diagram}
+  caption="El setter serializa si hace falta; el callback actualiza la vista sin volver a invocar un setter que escriba sin límite."
+/>
+
+En un upgrade los atributos observados ya presentes pueden disparar reacciones iniciales. No dependas de que la primera entrada llegue después de la primera conexión. La lista se obtiene al definir la clase: mutarla después no es una forma de reconfigurar dinámicamente el registro.
+
+## Laboratorio: raw y normalizado
+
+<Demo kind="atributos">
+  <p>
+    Escribe "250" como atributo y como propiedad. Compara el texto del atributo
+    y el número del getter. Elimina el atributo y observa el valor por defecto.
+    Después escribe muted="false": presencia sigue significando true.
+  </p>
+</Demo>
+
+<Code code={source} lang="ts" />
+
+## Decisiones del contrato
+
+La propiedad `value` normaliza a un número finito entre 0 y 100; el valor por defecto es 0. Su getter deriva el dato del atributo. El setter de propiedad serializa un valor normalizado solo si difiere del texto existente. Una escritura de atributo externa puede conservar `"250"` mientras el getter devuelve `100`: la API documenta interpretación normalizada sin reescribir por sistema el markup del consumidor.
+
+La actualización nativa de la vista ocurre en el callback. No vuelve a llamar al setter, así que no genera una cadena recursiva de `setAttribute`. Si eligieras estado interno como fuente de verdad, necesitarías otra política explícita de conversión y reflexión; no mezcles ambas arquitecturas a medias.
+
+| Escritura                        | Atributo tras la escritura | Propiedad interpretada |
+| -------------------------------- | -------------------------- | ---------------------- |
+| `setAttribute('value', '250')`   | `"250"`                    | `100`                  |
+| `element.value = 250`            | `"100"`                    | `100`                  |
+| `removeAttribute('value')`       | `null`                     | `0`                    |
+| `setAttribute('muted', 'false')` | `"false"` presente         | `true`                 |
+| `element.muted = false`          | Ausente                    | `false`                |
+
+Un booleano HTML por presencia no se convierte mediante comparación con la cadena `"true"`. Para desactivarlo elimina el atributo. Si necesitas tres estados o un valor textual diferente, diseña un atributo enumerado y documenta sus opciones.
+
+### Propiedades antes del upgrade
+
+Una asignación temprana puede crear una propiedad propia que oculte el accessor del prototipo. En la conexión del ejemplo se lee ese valor, se elimina la propiedad propia y se reasigna mediante el setter. La elección local da precedencia a esa asignación del consumidor; antes de conectar un nodo desconectado esa recuperación aún no ha ocurrido. Documenta el momento, no prometas que recuperar en `connectedCallback` cubre automáticamente todos los usos desconectados.
+
+Lit tiene su propia gestión de propiedades reactivas y valores tempranos; no copies por sistema el mismo bloque dentro de una clase Lit.
+
+## Comparación ejecutable con Lit
+
+[Native vs Lit Component](/laboratorios/defining-web-components/comparacion/) implementa el mismo rango y booleano. `@property` configura conversión y reflexión, y solicita la actualización del template. El converter normaliza la entrada del atributo; el setter propio normaliza asignaciones JavaScript. La normalización del dominio sigue siendo responsabilidad del autor.
+
+En el ejemplo Lit, la representación reflejada puede quedar normalizada cuando termina su ciclo; la comparación garantiza el contrato de datos y resultado visual, no identidad de cada cadena intermedia. No añadas un reflector manual en `updated()` que duplique el trabajo de Lit.
+
+## Buenas prácticas, resumen y entrevista
+
+No observes atributos que no consumes. No uses `any` para convertir entradas desconocidas ni una aserción de tipo como validación. Evita reescribir el atributo incondicionalmente desde su callback, o puedes provocar recursión. Los nombres de atributos de este contrato son minúsculos; las propiedades usan los identificadores JavaScript declarados.
+
+**Resumen:** observa entradas, convierte deliberadamente y define una dirección de actualización sin ciclos. **Entrevista:** ¿cómo distingue el callback una mutación externa de una interna? No recibe esa procedencia; tu arquitectura debe evitar depender de una distinción inexistente.
+
+## Referencias oficiales
+
+- [HTML: atributos y reacciones](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements-core-concepts).
+- [DOM: cambiar un atributo](https://dom.spec.whatwg.org/#concept-element-attributes-change).
+- [Lit: propiedades, conversores y reflexión](https://lit.dev/docs/components/properties/).
+
+<Progress lessonId="defining-attributes" />
+
+<Navigation current="06-atributos" end />
