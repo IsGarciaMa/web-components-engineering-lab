@@ -1,0 +1,65 @@
+---
+import {
+  usingLessons,
+  usingChapterHref,
+  usingLessonHref,
+} from '../../data/using-web-components';
+interface Props {
+  current: string;
+  end?: boolean;
+}
+const { current, end = false } = Astro.props;
+const index = usingLessons.findIndex((lesson) => lesson.slug === current);
+if (index < 0) throw new Error(`Lección desconocida: ${current}`);
+const previous = usingLessons[index - 1];
+const next = usingLessons[index + 1];
+---
+
+{
+  end ? (
+    <nav class="using-next not-content" aria-label="Continuar el capítulo">
+      <a href={previous ? usingLessonHref(previous.slug) : usingChapterHref}>
+        ← {previous ? previous.title : 'Mapa del capítulo'}
+      </a>
+      <a
+        href={
+          next
+            ? usingLessonHref(next.slug)
+            : '/ejercicios/using-web-components/'
+        }
+      >
+        {next ? next.title : 'Resolver los ejercicios'} →
+      </a>
+    </nav>
+  ) : (
+    <nav
+      class="using-lesson-nav not-content"
+      aria-label="Lecciones de Using Web Components"
+    >
+      <a class="text-link" href={usingChapterHref}>
+        ← Mapa del capítulo
+      </a>
+      <p class="eyebrow">
+        LECCIÓN {index + 1} DE 7 · {usingLessons[index]?.minutes} MIN
+        ORIENTATIVOS
+      </p>
+      <details>
+        <>
+          <summary>Explorar las siete lecciones</summary>
+          <ol>
+            {usingLessons.map((lesson) => (
+              <li>
+                <a
+                  href={usingLessonHref(lesson.slug)}
+                  aria-current={lesson.slug === current ? 'page' : undefined}
+                >
+                  {lesson.title}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </>
+      </details>
+    </nav>
+  )
+}

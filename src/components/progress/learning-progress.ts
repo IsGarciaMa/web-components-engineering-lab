@@ -1,13 +1,19 @@
 import { LitElement, css, html } from 'lit';
 import { property, state } from 'lit/decorators.js';
-import { foundationLesson } from '../../data/curriculum';
-
-const storageKey = 'lab-learning-progress-v1';
+import { publishedLessons } from '../../data/curriculum';
+import {
+  legacyProgressKey,
+  parseProgress,
+  progressStorageKey,
+} from './progress-contract';
 
 export class LearningProgress extends LitElement {
   @property({ attribute: 'lesson-id' }) lessonId = '';
   @state() private enabled = false;
-  @state() private completed = false;
+  @state() private completedIds: string[] = [];
+  private get completed(): boolean {
+    return this.completedIds.includes(this.lessonId);
+  }
   @state() private message = '';
 
   static override styles = css`
@@ -72,52 +78,57 @@ export class LearningProgress extends LitElement {
   override connectedCallback(): void {
     super.connectedCallback();
     try {
-      const saved = localStorage.getItem(storageKey);
+      const saved =
+        localStorage.getItem(progressStorageKey) ??
+        localStorage.getItem(legacyProgressKey);
       if (!saved) return;
-      const data: unknown = JSON.parse(saved);
-      if (
-        typeof data !== 'object' ||
-        data === null ||
-        !('version' in data) ||
-        data.version !== 1 ||
-        !('completed' in data) ||
-        typeof data.completed !== 'boolean'
-      ) {
-        this.message =
-          'Los datos guardados no son válidos. Puedes activar el progreso de nuevo.';
-        return;
-      }
+      this.completedIds = parseProgress(saved).completedIds;
       this.enabled = true;
-      this.completed = data.completed;
     } catch {
       this.message =
         'No se ha podido leer el progreso local. El contenido sigue disponible.';
     }
   }
 
-  private save(completed: boolean): void {
+  private async save(completed: boolean): Promise<void> {
+    const wasEnabled = this.enabled;
     try {
+      const completedIds =
+        this.lessonId && completed
+          ? [...new Set([...this.completedIds, this.lessonId])]
+          : this.completedIds.filter((id) => id !== this.lessonId);
       localStorage.setItem(
-        storageKey,
-        JSON.stringify({ version: 1, completed }),
+        progressStorageKey,
+        JSON.stringify({ version: 2, completedIds }),
       );
       this.enabled = true;
-      this.completed = completed;
+      this.completedIds = completedIds;
       this.message = completed
         ? 'Lección marcada como completada en este navegador.'
         : 'Progreso local activado. La lección está pendiente de completar.';
+      if (!wasEnabled) {
+        await this.updateComplete;
+        if (this.isConnected)
+          this.renderRoot
+            .querySelector<HTMLElement>('.actions button, .actions a')
+            ?.focus();
+      }
     } catch {
       this.message =
         'No se ha podido guardar. Comprueba los permisos de almacenamiento del navegador.';
     }
   }
 
-  private forget(): void {
+  private async forget(): Promise<void> {
     try {
-      localStorage.removeItem(storageKey);
+      localStorage.removeItem(progressStorageKey);
+      localStorage.removeItem(legacyProgressKey);
       this.enabled = false;
-      this.completed = false;
+      this.completedIds = [];
       this.message = 'Progreso borrado y seguimiento desactivado.';
+      await this.updateComplete;
+      if (this.isConnected)
+        this.renderRoot.querySelector<HTMLButtonElement>('button')?.focus();
     } catch {
       this.message =
         'No se ha podido borrar. Puedes eliminar los datos del sitio desde tu navegador.';
@@ -129,18 +140,21 @@ export class LearningProgress extends LitElement {
       <h2 id="progress-title">Tu progreso, en este navegador</h2>
       <p>
         Opcional y sin cuenta. Se guarda solo en este navegador; no se
-        sincroniza entre dispositivos. Incluye la lección inicial disponible, no
-        los once capítulos pendientes.
+        sincroniza entre dispositivos. Incluye la lección inicial y las siete
+        lecciones de Using Web Components. Los capítulos pendientes no cuentan.
       </p>
       ${this.enabled
         ? html` <progress
               aria-label="Lecciones disponibles completadas"
-              value=${Number(this.completed)}
-              max="1"
+              value=${this.completedIds.length}
+              max=${publishedLessons.length}
             ></progress>
-            <p>${Number(this.completed)} de 1 lección disponible completada.</p>
+            <p>
+              ${this.completedIds.length} de ${publishedLessons.length}
+              lecciones disponibles completadas.
+            </p>
             <div class="actions">
-              ${this.lessonId === foundationLesson.id
+              ${publishedLessons.some((lesson) => lesson.id === this.lessonId)
                 ? html`<button
                     type="button"
                     aria-pressed=${this.completed}
@@ -150,8 +164,11 @@ export class LearningProgress extends LitElement {
                       ? 'Marcar como pendiente'
                       : 'Marcar lección como completada'}
                   </button>`
-                : html`<a href=${foundationLesson.href}
-                    >Continuar con la lección inicial →</a
+                : html`<a
+                    href=${publishedLessons.find(
+                      (lesson) => !this.completedIds.includes(lesson.id),
+                    )?.href ?? '/capitulos/01-using-web-components/'}
+                    >Continuar aprendiendo →</a
                   >`}
               <button type="button" @click=${this.forget}>
                 Borrar y desactivar progreso

@@ -1,0 +1,102 @@
+---
+title: 'Consumir bibliotecas de Web Components'
+description: 'Lección original de Using Web Components con contrato, laboratorio, buenas prácticas y autoevaluación.'
+sidebar:
+  order: 1
+---
+
+import Navigation from '../../../../components/using/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+
+import Demo from '../../../../components/using/library-demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import flow from '../../../../../diagrams/using-consumption.mmd?raw';
+
+<Navigation current="01-bibliotecas" />
+
+## Introducción
+
+Una biblioteca de Web Components distribuye elementos personalizados y un contrato para usarlos: nombres de etiquetas, entradas, eventos, estilos públicos y requisitos. El formato npm ayuda a descargar y fijar versiones; el navegador no entiende npm. El bundler resuelve esos módulos y entrega JavaScript que registra las etiquetas.
+
+Consumir y construir son trabajos diferentes. Como consumidor decides si un componente resuelve tu caso, lo configuras y respondes a sus eventos. Como autor implementas su clase, accesibilidad y ciclo de vida. Puedes conocer un contrato sin conocer su árbol interno, del mismo modo que usas un `input` sin programar el navegador.
+
+## Objetivos
+
+- Reconocer las piezas de una distribución y registrar solo lo necesario.
+- Usar un componente existente con HTML y JavaScript.
+- Revisar dependencias, compatibilidad y alternativas nativas antes de adoptarlo.
+
+## Del paquete al elemento
+
+<Diagram
+  source={flow}
+  caption="La instalación ocurre en desarrollo; el registro y la interacción, en el navegador."
+/>
+
+En el proyecto está fijado **Web Awesome 3.14.0**, biblioteca MIT basada en Lit. Su botón es `wa-button`; ese prefijo pertenece a la biblioteca. No usamos un CDN, un autoloader global ni una copia del componente. El import explícito de `button.js` ejecuta su registro y permite al bundler seguir sus dependencias. Es la estrategia documentada por [Web Awesome](https://webawesome.com/docs).
+
+```sh
+# Para reproducir este portal usa su lockfile existente:
+pnpm install --frozen-lockfile
+# Para añadir esta versión en otro proyecto:
+pnpm add --save-exact @awesome.me/webawesome@3.14.0
+```
+
+Instalar no equivale a importar; importar una clase tampoco garantiza registro si la entrada del paquete solo la exporta. Consulta qué módulo llama a `customElements.define()`. Un host puede aparecer en HTML antes de que se descargue su definición; [la cuarta lección](../04-elementos-no-definidos/) permite observar ese intervalo.
+
+## Consumo real
+
+<Demo />
+
+Antes de probar: predice cuántas activaciones se registrarán si desactivas el botón y pulsas Espacio sobre él. Después revisa el código desplegable: Lit se utiliza para construir los controles del laboratorio, mientras que el botón procede del paquete npm.
+
+La demo importa el tema base en su página y el módulo concreto en cliente. Cambiar `disabled` afecta al botón de la biblioteca; escuchar `click` usa una API de eventos del navegador. El tema de una biblioteca y el tema del portal son contratos diferentes: no esperes que una variable `--lab-*` controle automáticamente una variable `--wa-*`.
+
+## Tres vías de comunicación
+
+| Necesidad                          | Vía habitual                              | Qué debes verificar                                 |
+| ---------------------------------- | ----------------------------------------- | --------------------------------------------------- |
+| Configuración serializable en HTML | Atributo, como `variant="brand"`          | Valores admitidos y efecto de quitarlo              |
+| Datos ricos o métodos              | Propiedad JavaScript o método documentado | Tipo, estado de registro y momento de actualización |
+| Notificación hacia el consumidor   | Evento nativo o `CustomEvent`             | Nombre exacto, payload y propagación                |
+
+TypeScript puede descubrir tipos exportados y completar APIs. Una declaración `HTMLElementTagNameMap` permite que `querySelector('lab-reading-card')` conozca el tipo cuando importas su módulo. Los tipos se borran al compilar: un dato procedente de red o un evento de origen desconocido sigue requiriendo comprobación en ejecución. No uses un cast para convertir una suposición en una garantía.
+
+## HTML nativo frente a una biblioteca
+
+| Opción                          | Ventaja en este caso                                              | Coste que asumes                                              |
+| ------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------- |
+| `button` HTML                   | Funciona sin descargar una biblioteca y tiene semántica integrada | Diseñar sus estilos y estados de producto                     |
+| `wa-button`                     | API visual consistente con el resto de Web Awesome                | JavaScript, tokens, actualización y mantenimiento del paquete |
+| `lab-reading-card` del capítulo | Permite practicar un contrato propio con propiedades y partes     | El autor debe diseñar su semántica y accesibilidad            |
+
+Una etiqueta personalizada no es superior por ser reutilizable. Si HTML resuelve el problema con menos integración, úsalo. Una biblioteca cobra valor cuando la consistencia entre muchos controles compensa su coste y sus requisitos son compatibles con tu producto.
+
+## Compatibilidad y buenas prácticas
+
+Dos bibliotecas pueden convivir si sus etiquetas no colisionan, sus estilos globales son compatibles y sus versiones cumplen sus contratos. El registro global de un documento no permite definir dos veces el mismo nombre; descargar dos versiones no crea dos nombres automáticamente. No ocultes una colisión con un `if` que deje al consumidor usando una implementación inesperada.
+
+Revisa licencia, `exports`, módulos con efectos de registro, dependencias y soporte de navegador. Fijar una versión y conservar el lockfile reproduce la resolución; no elimina vulnerabilidades ni garantiza que una actualización mayor mantenga atributos, eventos o partes. No importes toda una biblioteca por comodidad sin medir qué entrega tu build.
+
+## Errores habituales
+
+- Escribir `disabled="false"`: en un contrato booleano por presencia, el atributo sigue presente. Elimínalo para desactivar esa configuración.
+- Confundir una clase exportada con una etiqueta ya registrada.
+- Buscar el botón interno para cambiar su estilo en lugar de usar su API pública.
+- Copiar imports de un CDN sin revisar versión, procedencia y dependencias.
+
+## Resumen y autoevaluación
+
+La cadena de consumo es paquete → import → registro → host configurado → interacción. Poder identificar cada paso evita atribuir a npm un problema de navegador o a Lit un evento que pertenece al DOM.
+
+**Entrevista:** la etiqueta aparece y su texto es visible, pero no responde. ¿Cómo distinguirías módulo no descargado, etiqueta no registrada y contrato mal utilizado? Comprueba red y consola, `customElements.get('wa-button')` y la API documentada, en ese orden; ver texto no demuestra que la clase se haya ejecutado.
+
+## Referencias oficiales
+
+- [Web Awesome: instalación](https://webawesome.com/docs) y [botón](https://webawesome.com/docs/components/button/).
+- [WHATWG: Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html).
+- [TypeScript: declaración de tipos](https://www.typescriptlang.org/docs/handbook/declaration-files/introduction.html).
+
+<Progress lessonId="using-libraries" />
+
+<Navigation current="01-bibliotecas" end />

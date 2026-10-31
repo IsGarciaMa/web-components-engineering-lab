@@ -1,0 +1,24 @@
+import { Component, CUSTOM_ELEMENTS_SCHEMA, afterNextRender, signal } from '@angular/core';
+import { isLessonSelection } from '../../using/selection-contract';
+
+@Component({
+  selector: 'app-reader',
+  standalone: true,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  template: `
+    <lab-reading-card [reader]="reader()" heading="Desde Angular"
+      (lesson-select)="onSelection($event)">
+    </lab-reading-card>
+    <p role="status">{{ message() }}</p>
+  `,
+})
+export class ReaderComponent {
+  readonly reader = signal({ name: 'Ada' });
+  readonly message = signal('Sin eventos');
+  constructor() {
+    afterNextRender(() => { void import('../../using/reading-card'); });
+  }
+  onSelection(event: Event): void {
+    if (isLessonSelection(event)) this.message.set(event.detail.readerName);
+  }
+}

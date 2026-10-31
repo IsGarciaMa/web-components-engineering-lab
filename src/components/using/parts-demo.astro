@@ -1,0 +1,28 @@
+---
+import LabPanel from './lab-panel.astro';
+import source from '../../labs/using/parts-lab.ts?raw';
+import frame from '../../examples/using/card-frame.ts?raw';
+import card from '../../examples/using/reading-card.ts?raw';
+---
+
+<LabPanel
+  title="Partes públicas, sin atravesar el árbol"
+  objective="Personaliza un botón directo y otro anidado mediante part y exportparts."
+  sources={[
+    { label: 'Consumidor · parts-lab.ts', code: source },
+    { label: 'Composición · card-frame.ts', code: frame },
+    { label: 'API visual · reading-card.ts', code: card },
+  ]}
+>
+  <lab-parts-lab></lab-parts-lab>
+  <p slot="explanation">
+    Las reglas viven fuera de las tarjetas. El frame publica <code
+      >card-action</code
+    > como alias de <code>action</code>. Ningún consumidor consulta <code
+      >shadowRoot</code
+    > ni inyecta estilos internos.
+  </p>
+</LabPanel>
+<script>
+  import '../../labs/using/parts-lab';
+</script>

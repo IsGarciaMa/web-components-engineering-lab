@@ -1,0 +1,50 @@
+---
+title: 'Intermedio · Datos, eventos y estilo'
+description: 'Conecta una propiedad rica a un resultado observable y personaliza mediante una API pública.'
+---
+
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/using/exercise-consumer.ts?raw';
+
+[← Ejercicios del capítulo](/ejercicios/using-web-components/)
+
+## Enunciado
+
+Conecta una propiedad rica a un resultado observable y personaliza mediante una API pública.
+
+## Objetivos
+
+- Pasar un objeto por propiedad y validar un evento.
+- Diseñar limpieza y personalización desde el consumidor.
+
+## Requisitos
+
+- Usar una tarjeta y un resultado [data-exercise-result].
+- Permitir desmontar el consumidor sin dejar una suscripción activa.
+
+## Criterios de aceptación
+
+- reader contiene `{ name: "Ada" }` y no crea un atributo reader.
+- La acción muestra “Ada: Lectura del ejercicio”.
+- Una asignación programática no escribe un resultado de evento.
+- El radio se personaliza con --reader-radius.
+- Después de ejecutar la limpieza no se actualiza el resultado al activar de nuevo.
+
+## Verificación
+
+Escribe una predicción y una prueba observable por cada criterio. Usa `pnpm test` para el contrato y `pnpm build` seguido de `pnpm test:e2e` en un sistema soportado para DOM, estilos e interacción. El caso sin JavaScript necesita una recarga con ese entorno desactivado.
+
+## Solución de referencia
+
+<details>
+  <summary>Consultar la solución razonada</summary>
+
+La función `connectExercise()` es una solución ejecutable: fija un atributo, asigna el objeto, escribe un token en el host y escucha solo eventos cuyo payload supera el guard. Devuelve `controller.abort()` para que el propietario retire la suscripción al desmontar.
+
+Esta solución usa una variable porque cambia un valor documentado. Si necesitaras decorar el botón, emplearías `::part(action)`, sin buscarlo dentro de la raíz. Las pruebas llaman a la función real y comprueban el efecto de su limpieza.
+
+<Code code={source} lang="ts" />
+
+</details>
+
+[Volver al capítulo](/capitulos/01-using-web-components/)

@@ -1,0 +1,48 @@
+---
+import { usingLessons, usingLessonHref } from '../../data/using-web-components';
+---
+
+<div class="using-chapter not-content">
+  <p class="eyebrow">CAPÍTULO 01 · DISPONIBLE · 7 LECCIONES</p>
+  <p class="page-lead">
+    De una etiqueta desconocida a una integración que puedes explicar. Consume
+    una biblioteca real, diseña su apariencia y conecta su contrato a tu
+    aplicación.
+  </p>
+  <div class="using-chapter-meta">
+    <span>170 min de lectura y práctica orientativos</span><span
+      >8 laboratorios</span
+    ><span>3 ejercicios progresivos</span>
+  </div>
+  <div class="hero-actions">
+    <a class="lab-button primary" href={usingLessonHref(usingLessons[0].slug)}
+      >Empezar el capítulo →</a
+    ><a class="lab-button secondary" href="/laboratorios/using-web-components/"
+      >Explorar laboratorios</a
+    >
+  </div>
+  <ol class="using-lesson-grid">
+    {
+      usingLessons.map((lesson, index) => (
+        <li>
+          <>
+            <span class="chapter-number">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div>
+              <>
+                <h2>
+                  <a href={usingLessonHref(lesson.slug)}>{lesson.title}</a>
+                </h2>
+                <p>{lesson.outcome}</p>
+                <span class="section-note">
+                  {lesson.minutes} min · explicación, demo y autoevaluación
+                </span>
+              </>
+            </div>
+          </>
+        </li>
+      ))
+    }
+  </ol>
+</div>

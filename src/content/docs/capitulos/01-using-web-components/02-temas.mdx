@@ -1,0 +1,103 @@
+---
+title: 'Diseñar temas con CSS Custom Properties'
+description: 'Lección original de Using Web Components con contrato, laboratorio, buenas prácticas y autoevaluación.'
+sidebar:
+  order: 2
+---
+
+import Navigation from '../../../../components/using/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+
+import Demo from '../../../../components/using/theme-demo.astro';
+
+<Navigation current="02-temas" />
+
+## Introducción
+
+Un tema es un conjunto coherente de decisiones visuales: superficie, texto, acento, densidad, radios y estados. No es solo un color. Para mantenerlo necesitas nombres con significado, un ámbito de aplicación y una política de valores por defecto. Un componente puede ofrecer tokens como entradas CSS sin exponer su estructura.
+
+**Design token** describe una decisión de diseño nombrada. **CSS Custom Property** es un mecanismo del navegador para expresarla en CSS. No son sinónimos: un token puede vivir en un fichero de diseño, y una variable CSS también puede ser un detalle interno sin compromiso público.
+
+## Objetivos
+
+- Seguir un valor heredado desde un contenedor hasta Shadow DOM.
+- Aplicar un tema claro u oscuro y una excepción local.
+- Definir límites de personalización sin sacrificar legibilidad.
+
+## Herencia y ámbito
+
+Las propiedades personalizadas ordinarias participan en la cascada y heredan. El shadow host recibe variables de sus ancestros y sus descendientes internos pueden consumirlas. Eso no significa que un selector externo atraviese Shadow DOM: heredar un valor y seleccionar un nodo son mecanismos distintos. La [especificación CSS Variables](https://drafts.csswg.org/css-variables/) define la sustitución mediante `var()` y los valores de respaldo.
+
+En nuestra tarjeta, el componente consume `--reader-radius`; el contenedor de la demo establece su valor y una tarjeta lo sustituye localmente. El resto del portal conserva su tema. El alcance compartido representa una configuración de aplicación; no modifica `:root` del sitio para hacer funcionar el laboratorio.
+
+```css
+/* Consumidor: afecta a todos los descendientes que consuman estos tokens. */
+.reader-region {
+  --reader-radius: 12px;
+  --reader-space: 1.5rem;
+}
+/* Excepción documentada en un host concreto. */
+.reader-region lab-reading-card.local {
+  --reader-radius: 0;
+}
+```
+
+## Laboratorio: heredar y sobrescribir
+
+<Demo />
+
+1. Cambia el radio a 24 px. La primera tarjeta cambia; la segunda conserva su excepción.
+2. Cambia a oscuro. Observa que superficie y texto cambian juntos.
+3. Cambia el color del borde. El texto mantiene su pareja de contraste.
+4. Lee el consumidor y localiza qué valores aplica `styleMap` y cuáles viven en el componente.
+
+`styleMap` es una directiva de Lit para asignar propiedades de estilo; la cascada y la herencia siguen siendo CSS del navegador. El valor del radio viene de un rango acotado y el color de un control de color. No hay un campo de CSS arbitrario ni uso de `unsafeCSS` con entradas del usuario.
+
+## Contrato de tokens de la tarjeta
+
+| Token              | Responsabilidad           | Valor por defecto                         |
+| ------------------ | ------------------------- | ----------------------------------------- |
+| `--reader-surface` | Fondo de la superficie    | Superficie del portal, con fallback local |
+| `--reader-ink`     | Texto y control           | Texto del portal, con fallback local      |
+| `--reader-accent`  | Borde identificativo      | Verde `#08745a`                           |
+| `--reader-radius`  | Radio de la superficie    | `.8rem`                                   |
+| `--reader-space`   | Espaciado interior normal | `1.5rem`                                  |
+
+El estado `compact` aplica una densidad explícita del componente y prevalece sobre el espaciado normal. Esta decisión está en su contrato, no en una regla universal de variables. Comprueba la API del componente real antes de diseñar overrides.
+
+## Diseñar claro y oscuro
+
+Empieza por roles semánticos: texto sobre superficie, borde interactivo, error y foco. Después asigna valores concretos para cada tema. Si repartes literales por cada consumidor, cambiar la identidad visual exige perseguir decisiones repetidas.
+
+El modo de la demo es local y no cambia el selector Starlight. En un producto puedes usar una preferencia del sistema, una elección explícita o un ámbito de sección. Documenta la prioridad: un selector manual no debería parecer inoperante porque otra regla sobrescribe silenciosamente su resultado.
+
+Los fallbacks de `var()` ayudan si falta un token, pero no validan todos sus valores. `var(--reader-space, 1rem)` no sustituye un valor existente pero incompatible con `padding`. Evita prometer que una API de CSS admite cualquier texto o garantiza contraste automáticamente.
+
+## Buenas prácticas y límites
+
+Expón decisiones que el consumidor necesita, no una variable por cada línea de CSS. Mantén roles estables cuando cambie la implementación. Prueba texto largo, zoom, teclado, ambos temas y forced colors: un tema bonito no sustituye la accesibilidad.
+
+Una variable declarada en el shadow host puede impedir que gane el valor heredado del ancestro. Por eso el componente de referencia pone fallbacks donde consume los tokens en lugar de fijar todos los tokens públicos en `:host`. Si el autor registra una propiedad con `@property` de CSS y `inherits: false`, la estrategia de herencia será distinta. Ese `@property` pertenece a CSS; no es el decorator `@property` de Lit.
+
+## Errores habituales
+
+- Tratar cualquier variable interna como API estable.
+- Cambiar solo el fondo y dejar el texto del tema anterior.
+- Suponer que un nombre como `--primary-color` tiene el mismo significado en todas las bibliotecas.
+- Usar `!important` para compensar un ámbito que no se ha entendido.
+
+## Resumen y autoevaluación
+
+Un buen tema proporciona decisiones coherentes en un ámbito predecible. Los tokens cambian valores; la estructura y los estados siguen siendo responsabilidad del componente.
+
+**Entrevista:** dos tarjetas heredan un radio de 16 px y una declara 0 en su host. ¿Cuál gana y por qué? La declaración local sustituye el valor heredado. No necesitas penetrar en Shadow DOM para modificar una variable que su CSS consume.
+
+## Referencias oficiales
+
+- [CSS Variables: cascada y herencia](https://drafts.csswg.org/css-variables/).
+- [Lit: estilos y propiedades personalizadas](https://lit.dev/docs/components/styles/).
+- [Web Awesome: temas y personalización](https://webawesome.com/docs/customizing).
+
+<Progress lessonId="using-theming" />
+
+<Navigation current="02-temas" end />

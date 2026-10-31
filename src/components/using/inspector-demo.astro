@@ -1,0 +1,33 @@
+---
+import LabPanel from './lab-panel.astro';
+import source from '../../labs/using/inspector-lab.ts?raw';
+import card from '../../examples/using/reading-card.ts?raw';
+interface Props {
+  eventsOnly?: boolean;
+}
+const { eventsOnly = false } = Astro.props;
+---
+
+<LabPanel
+  title={eventsOnly
+    ? 'Eventos a través de Shadow DOM'
+    : 'Inspector del contrato público'}
+  objective={eventsOnly
+    ? 'Escucha, pausa y limpia un registro limitado de eventos reales.'
+    : 'Escribe un atributo, asigna un objeto y compara el contrato después de updateComplete.'}
+  sources={[
+    { label: 'Consumidor · inspector-lab.ts', code: source },
+    { label: 'Componente · reading-card.ts', code: card },
+  ]}
+>
+  <lab-inspector-lab events-only={eventsOnly || undefined}></lab-inspector-lab>
+  <p slot="explanation">
+    Las escrituras y <code>reset()</code> no notifican. Solo el botón de la tarjeta
+    emite <code>lesson-select</code>. El listener del inspector está fuera del
+    Shadow DOM de la tarjeta y el registro conserva como máximo cinco filas.
+    Leer el contrato espera el ciclo de Lit.
+  </p>
+</LabPanel>
+<script>
+  import '../../labs/using/inspector-lab';
+</script>

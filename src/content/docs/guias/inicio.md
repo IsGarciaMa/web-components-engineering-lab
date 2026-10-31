@@ -12,7 +12,7 @@ Web Components Engineering Lab propone entender qué aporta el navegador y qué 
 3. Compara las implementaciones en [el laboratorio](/laboratorios/contador/): vista funcional, código fuente y eventos.
 4. Resuelve [el ejercicio](/ejercicios/contador/) y repasa [la presentación](/slides/foundation.html).
 
-Los once capítulos están pendientes. La lección de PR-00 muestra la metodología y no sustituye su desarrollo posterior. Cada capítulo tendrá una PR propia; esta entrega no inicia PR-01.
+El capítulo [Using Web Components](/capitulos/01-using-web-components/) está publicado con siete lecciones. Los otros diez capítulos siguen pendientes. La lección de PR-00 conserva su papel de introducción. Cada capítulo se desarrolla en una PR propia.
 
 ## Ejecutar en local
 

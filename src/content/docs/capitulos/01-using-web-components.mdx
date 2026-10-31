@@ -1,0 +1,50 @@
+---
+title: '01 · Using Web Components'
+description: Consume, personaliza e integra Web Components mediante siete lecciones originales y ocho laboratorios.
+tableOfContents: false
+sidebar:
+  order: 1
+  badge:
+    text: Disponible
+    variant: success
+---
+
+import ChapterMap from '../../../components/using/chapter-map.astro';
+
+<ChapterMap />
+
+## Qué vas a aprender
+
+Usar un Web Component consiste en comprender una API de navegador y un contrato de biblioteca, no en reimplementar su interior. Aquí adoptarás el papel de consumidor: de dónde viene la etiqueta, qué datos acepta, cómo notifica acciones y qué parte de su apariencia puedes cambiar.
+
+Al terminar podrás elegir entre HTML nativo y una biblioteca, configurar atributos y propiedades, personalizar tokens y partes, observar el registro tardío y justificar una integración cliente con React o Astro. Distinguirás contenido HTML entregado por el servidor de comportamiento registrado en el navegador.
+
+## Antes de empezar
+
+Necesitas HTML semántico, CSS básico, módulos JavaScript y saber usar eventos. TypeScript ayuda a descubrir contratos; no aporta validación en tiempo de ejecución. Si quieres una comparación inicial entre estándar y Lit, lee [Un contrato, dos contadores](/guias/contador/).
+
+No necesitas implementar un Custom Element desde cero para seguir el capítulo. El código de los componentes está disponible para consulta, pero su construcción en profundidad corresponde a entregas posteriores. PR-03 ampliará conversiones, reflexión y contratos.
+
+## Cómo estudiar
+
+1. Lee el objetivo y predice lo que ocurrirá en la demo.
+2. Cambia una variable cada vez y compara el resultado observable.
+3. Abre el código real del consumidor; identifica qué API llama.
+4. Responde la pregunta de entrevista sin memorizar sintaxis.
+5. Resuelve [los ejercicios progresivos](/ejercicios/using-web-components/) antes de desplegar sus soluciones.
+
+El progreso local es una autoevaluación voluntaria por lección. No confirma haber dominado los conceptos ni publica información fuera de tu navegador.
+
+## Material del capítulo
+
+- [Ocho laboratorios con código real](/laboratorios/using-web-components/).
+- [Presentación Marp · Using Web Components](/slides/using-web-components.html).
+- [Ejercicios básico, intermedio y avanzado](/ejercicios/using-web-components/).
+
+## Convenciones y fuentes
+
+El índice de siete temas sirve como delimitación del alcance. Las explicaciones, diagramas, código y ejercicios son originales y se basan en especificaciones y documentación pública; no reproducen materiales privados de BlueSpire.
+
+Los elementos propios usan `lab-`; Web Awesome conserva `wa-`. Los bloques distinguen el estándar web, Lit y cada framework. React se ejecuta en la versión **19.3.1** fijada en el proyecto; las recetas Angular/Vue se contrastan con sus guías actuales y no se presentan como aplicaciones ejecutadas aquí.
+
+[WHATWG HTML](https://html.spec.whatwg.org/multipage/custom-elements.html) · [DOM](https://dom.spec.whatwg.org/) · [Web Awesome](https://webawesome.com/docs) · [Lit](https://lit.dev/docs/) · [React](https://react.dev/reference/react-dom/components)

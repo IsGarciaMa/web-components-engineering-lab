@@ -1,0 +1,18 @@
+<lab-static-summary class="static-summary">
+  <h3>Una lectura que llega con el HTML</h3>
+  <p>La documentación es accesible antes de descargar el JavaScript.</p>
+  <button
+    type="button"
+    data-summary-toggle
+    aria-expanded="true"
+    aria-controls="static-summary-detail"
+    hidden>Mostrar u ocultar explicación</button
+  >
+  <p id="static-summary-detail" data-summary-detail>
+    Astro genera este texto en build. El cliente añade el control para plegarlo,
+    sin reemplazar el contenido.
+  </p>
+</lab-static-summary>
+<script>
+  import '../../examples/using/static-summary';
+</script>

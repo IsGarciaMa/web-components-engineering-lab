@@ -1,0 +1,114 @@
+---
+title: 'Interactuar con componentes desde JavaScript'
+description: 'Lección original de Using Web Components con contrato, laboratorio, buenas prácticas y autoevaluación.'
+sidebar:
+  order: 5
+---
+
+import Navigation from '../../../../components/using/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+
+import Demo from '../../../../components/using/inspector-demo.astro';
+
+<Navigation current="05-javascript" />
+
+## Introducción
+
+Un Web Component es un elemento DOM con una API adicional. No necesitas un bus global para configurarlo ni un framework para escuchar sus eventos. La dificultad está en conocer qué acepta el contrato y cuándo puedes observar su resultado.
+
+Esta lección introduce el consumo. La conversión completa de valores, los modelos de reflexión y el diseño de contratos se desarrollarán en PR-03. Aquí usamos una tarjeta con reglas pequeñas y explícitas para poder experimentar sin ambigüedad.
+
+## Objetivos
+
+- Seleccionar un elemento y distinguir atributo, propiedad y método.
+- Recibir un `CustomEvent` con payload validado.
+- Observar propagación y limpiar listeners respetando su propietario.
+
+## API pública de la tarjeta
+
+| Entrada o salida                 | Tipo y valor inicial                   | Efecto                                                          |
+| -------------------------------- | -------------------------------------- | --------------------------------------------------------------- |
+| `heading` / atributo `heading`   | `string`, “Using Web Components”       | Texto del encabezado; refleja durante el ciclo Lit              |
+| `compact` / atributo `compact`   | `boolean`, `false`                     | Densidad reducida; el atributo es por presencia                 |
+| `reader`                         | `{ name: string }`, “Visitante”        | Propiedad rica; no tiene atributo equivalente                   |
+| `selected` / atributo `selected` | `boolean`, `false`                     | Estado seleccionado y `aria-pressed`                            |
+| `reset()`                        | Método sin argumentos                  | Desmarca sin emitir eventos                                     |
+| `lesson-select`                  | `CustomEvent<{ heading, readerName }>` | Se emite al activar el botón; `bubbles` y `composed` son `true` |
+
+Los nombres del payload son cadenas. Eliminar `heading` o asignarle un valor vacío restablece el encabezado por defecto; el evento conserva así su contrato de texto. `reader` normaliza una entrada inválida a “Visitante”, recorta espacios y limita el nombre a 80 caracteres. Asignar un objeto nuevo expresa un cambio detectable; mutar `card.reader.name` no solicita por sí solo una actualización Lit. El consumidor debe tratar el valor como dato y asignar una nueva referencia.
+
+## Atributo frente a propiedad
+
+`setAttribute()` y `getAttribute()` trabajan con cadenas o ausencia (`null`). Las propiedades son miembros JavaScript y pueden contener objetos. Que sus nombres coincidan no implica que se sincronicen: lo decide el componente. En este ejemplo Lit refleja algunas propiedades; no todos los Web Components lo hacen.
+
+```ts
+await customElements.whenDefined('lab-reading-card');
+const card = document.querySelector('lab-reading-card');
+if (card) {
+  card.setAttribute('heading', 'Lectura de hoy');
+  card.reader = { name: 'Ada' };
+  card.compact = true;
+  await card.updateComplete; // API de Lit; no forma parte de HTMLElement.
+}
+```
+
+El tipo del selector procede del mapa de etiquetas declarado por el módulo. Si seleccionas una cadena dinámica, debes comprobar el tipo o la capacidad antes de llamar métodos. `querySelector()` también puede devolver `null`; no asumas que cualquier página contiene la demo.
+
+## Inspector: observar sin adivinar
+
+<Demo />
+
+Pulsa **Asignar objeto** y luego lee la instantánea: la propiedad `reader` contiene datos, mientras `getAttribute('reader')` sigue siendo `null`. No aparece `[object Object]` en HTML. Alterna `compact`: presencia y booleano representan canales distintos. Las acciones esperan `updateComplete` antes de leer atributos reflejados.
+
+Ahora pulsa el botón de la tarjeta. Se añade un evento. Asignar el objeto o llamar a `reset()` no añade filas. Esta distinción evita que el consumidor interprete su propia escritura como una nueva intención del usuario y cree un bucle de realimentación.
+
+## Eventos y fronteras
+
+`CustomEvent` pertenece al navegador. Su campo `detail` lleva el payload acordado; Lit no necesita un sistema de eventos paralelo. El nombre distingue mayúsculas y minúsculas. El consumidor debe suscribirse a `lesson-select`, no a un nombre parecido inventado por su framework.
+
+`bubbles` permite el recorrido por ancestros en la fase de burbujeo. `composed` permite cruzar fronteras Shadow DOM en el recorrido del evento. Son decisiones independientes: no conviertas `composed` en sinónimo de “burbujea”. El retargeting puede hacer que `event.target` visto desde fuera sea el host; usa el payload acordado en lugar de depender de un botón interno. La semántica completa del recorrido está en el [estándar DOM](https://dom.spec.whatwg.org/#events).
+
+El laboratorio de eventos coloca el listener fuera de la raíz de la tarjeta y conserva cinco filas como máximo:
+
+<Demo eventsOnly />
+
+Pausa la escucha y comprueba que la tarjeta sigue funcionando. El control modifica qué registra el consumidor; no cambia el contrato del componente ni cancela su evento.
+
+## Suscripción y limpieza
+
+```ts
+const controller = new AbortController();
+card.addEventListener('lesson-select', handleSelection, {
+  signal: controller.signal,
+});
+// Al desmontar este consumidor:
+controller.abort();
+```
+
+`handleSelection` debe comprobar `event instanceof CustomEvent` y la forma de `detail` si no puede confiar en el origen. El módulo `selection-contract.ts` muestra esa comprobación sin convertir cualquier evento con un cast. El consumidor Astro utiliza funciones estables y `removeEventListener()` al desconectar; Lit gestiona los listeners declarados en su propio template.
+
+Un listener de un nodo que posees no exige el mismo tratamiento que uno instalado en `window`. Lo importante es quién mantiene vivo a quién y si volver a conectar duplica suscripciones. Conserva la función original: dos funciones flecha escritas igual siguen siendo objetos diferentes.
+
+## Errores habituales
+
+- Escribir `reader="{...}"` esperando que aparezca un objeto.
+- Leer el DOM inmediatamente después de una asignación Lit.
+- Confundir el retorno de un método con un evento de usuario.
+- Depender de `shadowRoot.querySelector('button')` para integrar la aplicación.
+- Escuchar en cada render y olvidar retirar el listener anterior.
+
+## Resumen y autoevaluación
+
+El contrato se consume con DOM APIs: cadenas para atributos, datos para propiedades, acciones explícitas mediante métodos y notificaciones mediante eventos. Comprueba el momento de actualización que promete cada implementación.
+
+**Entrevista:** ¿por qué `setAttribute('compact', 'false')` puede compactar la tarjeta? Porque su conversor booleano interpreta presencia. Para retirarlo usa `removeAttribute('compact')` o asigna `card.compact = false`.
+
+## Referencias oficiales
+
+- [DOM: elementos y eventos](https://dom.spec.whatwg.org/).
+- [Lit: propiedades](https://lit.dev/docs/components/properties/) y [eventos](https://lit.dev/docs/components/events/).
+- [MDN: `addEventListener()`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener).
+
+<Progress lessonId="using-javascript" />
+
+<Navigation current="05-javascript" end />

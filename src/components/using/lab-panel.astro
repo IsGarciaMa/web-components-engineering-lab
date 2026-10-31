@@ -1,0 +1,41 @@
+---
+import { Code } from '@astrojs/starlight/components';
+interface Source {
+  label: string;
+  code: string;
+  lang?: 'ts' | 'astro' | 'css';
+}
+interface Props {
+  title: string;
+  objective: string;
+  sources: readonly Source[];
+}
+const { title, objective, sources } = Astro.props;
+---
+
+<section class="using-lab not-content" aria-label={title}>
+  <header>
+    <p class="eyebrow">EXPERIMENTA · OBSERVA · EXPLICA</p><h2>{title}</h2><p>
+      {objective}
+    </p>
+  </header>
+  <div class="using-lab-stage"><slot /></div>
+  <div class="using-lab-explanation"><slot name="explanation" /></div>
+  <div class="using-sources">
+    {
+      sources.map(({ label, code, lang = 'ts' }) => (
+        <details>
+          <>
+            <summary>{label}</summary>
+            <Code code={code} lang={lang} />
+          </>
+        </details>
+      ))
+    }
+  </div>
+  <p class="section-note">
+    Usa Tab para recorrer los controles y Enter o Espacio para activarlos. Los
+    resultados se muestran como texto; no dependas solo del color. No se ejecuta
+    código editable.
+  </p>
+</section>

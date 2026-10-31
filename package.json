@@ -21,21 +21,28 @@
     "test:e2e": "node scripts/run-local-tool.mjs playwright test",
     "slides:build": "node scripts/run-local-tool.mjs marp --input-dir presentations --output public/slides",
     "skills:check": "node scripts/validate-skills.mjs",
-    "check": "pnpm skills:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:tooling && pnpm test && pnpm build && pnpm test:e2e && git diff --check",
-    "test:tooling": "node --test tests/tooling/*.test.mjs"
+    "check": "pnpm skills:check && pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:tooling && pnpm test && pnpm build && pnpm docs:check && pnpm test:e2e && git diff --check",
+    "test:tooling": "node --test tests/tooling/*.test.mjs",
+    "docs:check": "node scripts/validate-build.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.8",
+    "@awesome.me/webawesome": "3.14.0",
     "astro": "7.4.4",
     "lit": "3.3.3",
-    "mermaid": "12.2.0"
+    "mermaid": "12.2.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.12",
+    "@astrojs/markdown-satteri": "0.4.6",
     "@eslint/js": "9.39.3",
     "@marp-team/marp-cli": "4.5.1",
     "@playwright/test": "1.64.1",
     "@types/node": "24.10.13",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "axe-core": "4.11.0",
     "eslint": "9.39.5",
     "eslint-plugin-astro": "1.5.0",

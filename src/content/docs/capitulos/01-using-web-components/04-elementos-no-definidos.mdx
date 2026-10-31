@@ -1,0 +1,101 @@
+---
+title: 'Estilizar elementos antes de su registro'
+description: 'Lección original de Using Web Components con contrato, laboratorio, buenas prácticas y autoevaluación.'
+sidebar:
+  order: 4
+---
+
+import Navigation from '../../../../components/using/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+
+import Demo from '../../../../components/using/undefined-demo.astro';
+
+<Navigation current="04-elementos-no-definidos" />
+
+## Introducción
+
+El parser puede encontrar una etiqueta como `lab-deferred-note` antes de que exista su definición. El nodo ya está en el DOM y puede contener texto y enlaces. Lo que falta es su comportamiento personalizado. Ese intervalo puede durar milisegundos, depender de una interacción o no terminar si falla la descarga.
+
+Diseñar solo el estado final oculta un requisito de producto: decidir qué puede hacer la persona mientras carga el componente. Una buena estrategia no convierte un fallo de JavaScript en una página vacía.
+
+## Objetivos
+
+- Distinguir nodo existente, nombre registrado y actualización terminada.
+- Usar `:defined` con un estado inicial útil.
+- Evitar ocultaciones permanentes y explicar los límites del registro global.
+
+## Antes y después de `define()`
+
+| Estado                 | Qué existe                                                   | Qué no debes suponer                                        |
+| ---------------------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| Host sin definición    | Elemento, atributos, hijos Light DOM y APIs de `HTMLElement` | Métodos y efectos de la clase personalizada                 |
+| Nombre registrado      | Definición asociada al registro y upgrade de candidatos      | Que una tarea externa o el render asíncrono hayan terminado |
+| Componente actualizado | Estado visual según el ciclo del autor                       | Que todos los descendientes o recursos de red estén listos  |
+
+El **upgrade** aplica la definición a un elemento que ya existía. No requiere borrar el host ni volver a insertar el contenido. El registro de un nombre y la actualización visual son pasos diferentes. `customElements.whenDefined(name)` espera la definición; `updateComplete` es una promesa de Lit para su propio ciclo de actualización, no una API universal de Web Components.
+
+## Laboratorio: el mismo nodo
+
+<Demo />
+
+Antes de pulsar el botón, utiliza el enlace de la nota. Luego registra el elemento y vuelve a recorrerlo con el teclado. La clase crea una raíz shadow con un slot: el contenido original se distribuye sin duplicarse. El borde discontinuo pasa a continuo; no se usa únicamente el color para comunicar el cambio.
+
+El módulo exporta la clase sin registrarla automáticamente. Así la demo separa **descargar código** de **registrar el nombre**. En la mayoría de bibliotecas el import de un módulo de componente realiza ambas cosas, pero eso es una elección de empaquetado, no una regla de ECMAScript.
+
+## `:defined` y reserva de espacio
+
+La pseudoclase `:defined` también coincide con elementos nativos definidos por HTML. Para observar solo un componente escribe un selector específico como `lab-deferred-note:defined`, no una regla global que suponga que todos los elementos indefinidos son de tu propiedad. [MDN documenta esta distinción](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/:defined).
+
+```css
+lab-deferred-note {
+  display: block;
+  min-block-size: 8rem;
+  box-sizing: border-box;
+}
+lab-deferred-note:not(:defined) {
+  border-style: dashed;
+}
+lab-deferred-note:defined {
+  border-style: solid;
+}
+```
+
+Reservar una altura mínima reduce una causa de salto, pero no demuestra CLS cero. El texto puede crecer, las fuentes pueden cambiar o el componente final puede necesitar más espacio. Comprueba tamaños reales y contenido largo. No uses una altura rígida que recorte información con zoom.
+
+## Estrategias y sus costes
+
+- **Contenido útil en Light DOM:** buena opción si el componente puede mejorar HTML existente. Conserva lectura y enlaces sin depender del registro.
+- **Placeholder con espacio reservado:** útil para una visualización que necesita JavaScript. Debe explicar qué está cargando y qué hacer si falla.
+- **Ocultar solo un control sin comportamiento:** evita ofrecer una acción inoperante; deja disponible el contenido principal.
+- **Ocultar todo hasta `:defined`:** puede evitar un destello, pero una descarga fallida deja el contenido oculto indefinidamente. Úsalo solo con una alternativa y recuperación deliberadas.
+
+Progressive enhancement empieza por una experiencia básica completa y añade capacidades. No consiste en escribir `display: none` hasta que el componente parezca listo.
+
+## Registro, recarga y propiedades tempranas
+
+El registro global pertenece al documento; el estándar no ofrece `undefine()`. Crear otra instancia no vuelve el nombre al estado inicial y definirlo dos veces provoca un error. La demo evita repetir el registro y pide recargar para repetir la transición. No acumula nombres artificiales para simular un desregistro.
+
+Un consumidor puede asignar una propiedad antes del upgrade. Esa asignación puede crear una propiedad propia que oculte un accessor de la clase. Los autores deben preverlo; aquí el consumidor espera el registro para usar métodos específicos. La implementación detallada de recuperación se estudiará después, sin convertir esta introducción al consumo en un capítulo de lifecycle.
+
+## Buenas prácticas y errores habituales
+
+No confundas `whenDefined()` con una señal de red exitosa de cualquier recurso del componente. Si el nombre es válido pero nunca se registra, la promesa puede seguir pendiente. Un producto que necesita gestionar fallos debe diseñar esa recuperación explícitamente.
+
+No borres los hijos del host para reconstruirlos a mano cuando aparezca la clase. Puedes perder foco, referencias y contenido. Tampoco uses una variable `isReady` como sustituto de un contrato concreto: pregunta qué etapa necesitas esperar.
+
+## Resumen y autoevaluación
+
+El estado previo al registro es parte de la interfaz. Conserva utilidad, reserva espacio razonable y usa señales de preparación con el significado correcto.
+
+**Entrevista:** ¿`await customElements.whenDefined('lab-reading-card')` garantiza que puedes medir el tamaño final? No: garantiza definición. Con este componente Lit también deberías esperar su actualización y considerar cualquier recurso que influya en la medición.
+
+## Referencias oficiales
+
+- [WHATWG: upgrade de Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html#upgrades).
+- [MDN: `:defined`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/:defined).
+- [MDN: `whenDefined()`](https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/whenDefined).
+- [Lit: ciclo reactivo](https://lit.dev/docs/components/lifecycle/).
+
+<Progress lessonId="using-undefined" />
+
+<Navigation current="04-elementos-no-definidos" end />

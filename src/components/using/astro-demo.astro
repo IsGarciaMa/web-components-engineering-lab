@@ -1,0 +1,26 @@
+---
+import LabPanel from './lab-panel.astro';
+import Preview from './astro-preview.astro';
+import source from '../../examples/frameworks/astro-consumer.ts?raw';
+import markup from './astro-preview.astro?raw';
+---
+
+<LabPanel
+  title="Astro y DOM nativo"
+  objective="Conecta el HTML generado por Astro a propiedades y eventos en cliente."
+  sources={[
+    {
+      label: 'HTML y script · astro-preview.astro',
+      code: markup,
+      lang: 'astro',
+    },
+    { label: 'Consumidor · astro-consumer.ts', code: source },
+  ]}
+>
+  <Preview />
+  <p slot="explanation">
+    El frontmatter no importa clases basadas en HTMLElement. El script se
+    ejecuta en el navegador; no necesita <code>client:load</code>. Esta tarjeta
+    Lit se renderiza en cliente: el host estático no demuestra SSR de Lit.
+  </p>
+</LabPanel>

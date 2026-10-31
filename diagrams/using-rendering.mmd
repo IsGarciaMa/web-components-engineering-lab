@@ -1,0 +1,10 @@
+sequenceDiagram
+  accTitle: HTML primero y mejora posterior
+  accDescr: Astro genera contenido en build. El navegador lo presenta antes de descargar el script. El registro conecta el comportamiento conservando los nodos.
+  participant A as Astro en build
+  participant H as HTML estático
+  participant N as Navegador
+  A->>H: texto, enlaces y controles ocultos
+  H->>N: contenido legible
+  N->>N: descargar módulo y registrar
+  N->>N: habilitar control y escuchar eventos

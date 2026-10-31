@@ -2,11 +2,13 @@
 import { foundationLesson } from '../../data/curriculum';
 interface Props {
   lesson?: boolean;
+  lessonId?: string;
 }
-const { lesson = false } = Astro.props;
+const { lesson = false, lessonId } = Astro.props;
 ---
 
-<lab-learning-progress lesson-id={lesson ? foundationLesson.id : undefined}
+<lab-learning-progress
+  lesson-id={lessonId ?? (lesson ? foundationLesson.id : undefined)}
 ></lab-learning-progress>
 <noscript
   ><p>

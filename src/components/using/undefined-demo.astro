@@ -1,0 +1,27 @@
+---
+import LabPanel from './lab-panel.astro';
+import source from '../../labs/using/undefined-lab.ts?raw';
+import note from '../../examples/using/deferred-note.ts?raw';
+---
+
+<LabPanel
+  title="Observar un registro tardío"
+  objective="Compara :not(:defined) y :defined preservando un enlace útil y espacio reservado."
+  sources={[
+    { label: 'Consumidor · undefined-lab.ts', code: source },
+    {
+      label: 'Definición sin registro automático · deferred-note.ts',
+      code: note,
+    },
+  ]}
+>
+  <lab-undefined-lab></lab-undefined-lab>
+  <p slot="explanation">
+    Importar este módulo no registra la nota: el botón llama a la función de
+    registro. El mismo nodo y sus hijos permanecen. Recargar crea un documento
+    nuevo; no existe una API estándar para desregistrar el nombre.
+  </p>
+</LabPanel>
+<script>
+  import '../../labs/using/undefined-lab';
+</script>

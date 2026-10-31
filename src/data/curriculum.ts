@@ -1,3 +1,5 @@
+import { usingLessons, usingLessonHref } from './using-web-components';
+
 export type EditorialStatus = 'pending' | 'available' | 'in-progress';
 
 export const statusLabels: Record<EditorialStatus, string> = {
@@ -18,14 +20,16 @@ export interface Chapter {
 // El índice conserva el orden original. Publicar recursos de PR-00 no publica un capítulo.
 export const chapters: readonly Chapter[] = [
   {
-    slug: '01-plataforma-web',
-    title: 'La plataforma web y los estándares',
-    description: 'Construye un mapa de las piezas que el navegador ya ofrece.',
+    slug: '01-using-web-components',
+    title: 'Using Web Components',
+    description:
+      'Consume, personaliza e integra componentes en siete lecciones prácticas.',
     stage: 'Estándares web',
-    status: 'pending',
+    status: 'available',
     objectives: [
-      'Distinguir estándares, APIs y bibliotecas.',
-      'Explicar cómo colaboran HTML, DOM y JavaScript.',
+      'Consumir bibliotecas y reconocer sus contratos públicos.',
+      'Personalizar con tokens y partes sin modificar el Shadow DOM.',
+      'Integrar propiedades, eventos y renderizado cliente con criterio.',
     ],
   },
   {
@@ -148,3 +152,12 @@ export const foundationLesson = {
   title: 'Un contrato, dos contadores',
   href: '/guias/contador/',
 } as const;
+
+export const publishedLessons = [
+  foundationLesson,
+  ...usingLessons.map((lesson) => ({
+    id: lesson.id,
+    title: lesson.title,
+    href: usingLessonHref(lesson.slug),
+  })),
+];

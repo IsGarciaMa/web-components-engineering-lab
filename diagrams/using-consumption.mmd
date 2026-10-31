@@ -1,0 +1,8 @@
+flowchart LR
+  accTitle: Del paquete al componente
+  accDescr: pnpm fija la biblioteca. El bundler entrega el módulo al navegador, que registra el elemento. El consumidor configura propiedades y recibe eventos.
+  N[Paquete npm fijado] --> B[Bundler]
+  B --> R[Registro en navegador]
+  R --> H[Host HTML]
+  C[Consumidor] -->|atributos y propiedades| H
+  H -->|eventos| C

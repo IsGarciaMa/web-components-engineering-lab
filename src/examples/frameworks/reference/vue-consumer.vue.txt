@@ -1,0 +1,20 @@
+<!-- En vite.config.ts, dentro del plugin vue():
+  template: { compilerOptions: {
+    isCustomElement: (tag) => tag.startsWith('lab-')
+  }}
+-->
+<script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { isLessonSelection } from '../../using/selection-contract';
+const reader = ref({ name: 'Ada' });
+const message = ref('Sin eventos');
+onMounted(() => { void import('../../using/reading-card'); });
+function onSelection(event: Event): void {
+  if (isLessonSelection(event)) message.value = event.detail.readerName;
+}
+</script>
+<template>
+  <lab-reading-card :reader.prop="reader" heading="Desde Vue"
+    @lesson-select="onSelection" />
+  <p role="status">{{ message }}</p>
+</template>

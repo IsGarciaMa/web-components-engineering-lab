@@ -1,0 +1,23 @@
+<div
+  class="using-dsd"
+  role="group"
+  aria-label="Shadow DOM declarativo sin clase personalizada"
+>
+  <template shadowrootmode="open">
+    <style is:inline>
+      :host {
+        display: block;
+        border: 2px solid currentColor;
+        border-radius: 0.8rem;
+        padding: 1rem;
+      }
+      p {
+        margin: 0;
+        line-height: 1.7;
+      }
+    </style>
+    <p>Esta raíz shadow la crea el parser HTML, sin registrar una clase.</p>
+    <slot is:inline />
+  </template>
+  <p>Este contenido Light DOM continúa disponible.</p>
+</div>
