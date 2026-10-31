@@ -1,0 +1,42 @@
+---
+title: '03 · Working with the DOM'
+description: Ocho lecciones para diseñar atributos, propiedades y eventos construyendo Tabs accesibles.
+tableOfContents: false
+sidebar:
+  order: 3
+  badge:
+    text: Disponible
+    variant: success
+---
+
+import ChapterMap from '../../../components/dom/chapter-map.astro';
+
+<ChapterMap />
+
+## Un proyecto, ocho decisiones conectadas
+
+PR-02 explicó cómo se define un componente y cuándo reacciona el navegador. Ahora diseñarás su relación con el DOM y con otros consumidores. El proyecto conductor es un sistema Tabs con versiones nativa y Lit que comparten contrato funcional y accesible.
+
+## Prerrequisitos y resultados
+
+Necesitas clases, módulos, consultas DOM y los conceptos de [Defining Web Components](/capitulos/02-defining-web-components/). Al terminar podrás distinguir atributo y propiedad, diseñar eventos cancelables, mantener foco separado de selección y justificar qué nodos actualiza cada renderer.
+
+## Cómo trabajar
+
+1. Define una predicción sobre el contrato.
+2. Ejecuta el laboratorio y observa estado, ARIA o recorrido real.
+3. Consulta las fuentes importadas del mismo código ejecutable.
+4. Cambia una entrada cada vez y explica el resultado.
+5. Resuelve los ejercicios antes de abrir sus soluciones.
+
+La selección manual y los IDs estables son decisiones explícitas del ejemplo. No se ofrecen como reglas universales de todo Custom Element. La comparación con Lit distingue APIs del navegador y sistema reactivo.
+
+- [Cuatro laboratorios](/laboratorios/working-with-dom/).
+- [Tres ejercicios con soluciones voluntarias](/ejercicios/working-with-dom/).
+- [Presentación Marp · Working with the DOM](/slides/working-with-dom.html).
+
+## Límites y evidencia
+
+Scoped registries es una demostración opcional con detección real de capacidad. Tabs utiliza el registro global y conserva el contenido Light DOM del consumidor. Los tests de navegador cubren teclado, responsive y accesibilidad en CI compatible; no se declaran ejecutados por disponer de código de prueba.
+
+La persistencia local añade ocho IDs al progreso previo sin cambiar su clave ni certificarse aprendizaje. No se inicia el capítulo 04. Explicaciones y ejemplos originales a partir de [DOM](https://dom.spec.whatwg.org/), [HTML](https://html.spec.whatwg.org/) y [WAI-ARIA APG](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/), sin reproducir materiales privados.

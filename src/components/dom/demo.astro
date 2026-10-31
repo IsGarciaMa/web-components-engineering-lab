@@ -1,0 +1,42 @@
+---
+import LabPanel from '../using/lab-panel.astro';
+import { domLabs, type DomLabKind } from '../../data/working-with-dom';
+interface Props {
+  kind: DomLabKind;
+}
+const { kind } = Astro.props;
+const lab = domLabs.find((item) => item.slug === kind);
+if (!lab) {
+  throw new Error(`Laboratorio desconocido: ${kind}`);
+}
+const sources = import.meta.glob<string>(
+  ['../../labs/dom/*.ts', '../../examples/dom/*.ts'],
+  { query: '?raw', import: 'default', eager: true },
+);
+const files =
+  kind === 'eventos'
+    ? ['event-probe']
+    : ['tabs-contract', 'native-tabs', 'lit-tabs', 'tabs-consumer'];
+const paths = [
+  `../../labs/dom/${lab.module}.ts`,
+  ...files.map((name) => `../../examples/dom/${name}.ts`),
+];
+const code = paths.map((path) => {
+  const source = sources[path];
+  if (!source) {
+    throw new Error(`Fuente ausente: ${path}`);
+  }
+  return { label: path.split('/').at(-1) ?? path, code: source };
+});
+const Tag = lab.tag;
+---
+
+<LabPanel title={lab.title} objective={lab.objective} sources={code}>
+  <Tag /><div slot="explanation"><slot /></div>
+</LabPanel>
+<script>
+  import '../../labs/dom/playground-lab';
+  import '../../labs/dom/attributes-lab';
+  import '../../labs/dom/events-lab';
+  import '../../labs/dom/selection-lab';
+</script>

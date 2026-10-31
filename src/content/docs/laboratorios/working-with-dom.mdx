@@ -1,0 +1,30 @@
+---
+title: Laboratorios de Working with the DOM
+description: Cuatro experiencias reales de Tabs, atributos, eventos y selección.
+tableOfContents: false
+---
+
+import { domLabs } from '../../../data/working-with-dom';
+
+<p class="page-lead">
+  Una API, dos implementaciones y observaciones reales. Predice, interactúa,
+  compara y consulta el código ejecutado.
+</p>
+
+<div class="using-lab-grid not-content">
+  {domLabs.map((lab, index) => (
+    <a href={`/laboratorios/working-with-dom/${lab.slug}/`}>
+      <span class="eyebrow">LAB {String(index + 1).padStart(2, '0')}</span>
+      <h2>{lab.title}</h2>
+      <p>{lab.objective}</p>
+    </a>
+  ))}
+</div>
+
+## Dos rutas de aprendizaje
+
+Si estás construyendo tu primer componente, empieza por Playground y el inspector. Si necesitas depurar integración, usa el explorador de eventos y después Selection State Lab. La [prueba opcional de registros locales](/capitulos/03-working-with-dom/08-registries/) aporta otro ámbito de creación sin convertirse en dependencia del portal.
+
+Las fuentes se importan de los módulos ejecutables. El laboratorio solo modifica su propio contenido y usa la API pública de Tabs; los eventos y callbacks de los ejemplos no se presentan como simulaciones.
+
+[Mapa del capítulo](/capitulos/03-working-with-dom/) · [Ejercicios](/ejercicios/working-with-dom/)

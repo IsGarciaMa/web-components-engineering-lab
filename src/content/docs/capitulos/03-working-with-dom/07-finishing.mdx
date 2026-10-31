@@ -1,0 +1,87 @@
+---
+title: 'Finishing Touches'
+description: 'DOM y contratos de Tabs: Finishing Touches, código real y decisiones de ingeniería.'
+sidebar:
+  order: 7
+---
+
+import Navigation from '../../../../components/dom/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/dom/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/dom/lit-tabs.ts?raw';
+import diagram from '../../../../../diagrams/dom-finishing.mmd?raw';
+
+<Navigation current="07-finishing" />
+
+## Introducción y objetivos
+
+Un componente no termina cuando el caso de tres pestañas funciona. Una colección vacía, una pestaña retirada mientras tiene foco o una reconexión pueden revelar contratos que el ejemplo feliz ocultaba.
+
+Aprenderás a completar esos casos sin convertir Tabs en un framework. Las decisiones se explican mediante efectos observables y pruebas compartidas; no mediante una lista de optimizaciones hipotéticas.
+
+## Selección inicial y conjunto disponible
+
+La primera asignación de `items` resuelve una preferencia pendiente de `selected`. Si es válida y habilitada se conserva; si no, se toma la primera habilitada. Asignar un conjunto vacío o con todos sus items deshabilitados deja selección vacía y muestra un mensaje. La lista vacía se oculta también del árbol accesible: no se anuncia un tablist sin tabs. No se crea un tab ficticio para hacer pasar el patrón.
+
+<Diagram
+  source={diagram}
+  caption="Actualizar datos valida la selección y conserva foco cuando sigue siendo útil; recupera únicamente el que deja de ser válido."
+/>
+
+## Laboratorio de casos límite
+
+<Demo kind="tabs">
+  <p>
+    Selecciona Contrato y deshabilítala. Retira un panel, vacía la lista y
+    restaura. Inspecciona los IDs antes y después. Compara el control manual de
+    nodos con el render reactivo; el consumidor sigue siendo dueño del contenido
+    de los slots.
+  </p>
+</Demo>
+
+### Contenido dinámico
+
+Cambiar el texto de un panel proyectado no exige regenerar los metadatos: el consumidor actualiza su nodo. Añadir una pestaña exige publicar un nuevo array `items` y aportar contenido con el slot correspondiente. Si falta contenido, se muestra un fallback explícito. Un slot sin item asociado no crea automáticamente una pestaña.
+
+Los IDs se generan con un prefijo por instancia y el ID estable del item. Dos widgets pueden reutilizar `intro` sin repetir los IDs de sus botones y paneles. Reordenar no cambia esas relaciones. No uses el índice de un bucle como identidad semántica y después esperes preservar el foco del mismo tab.
+
+## Recuperación de foco
+
+Antes de cambiar estructura o selección se observa el elemento activo relevante. Si sigue existiendo, habilitado y visible, se conserva. Si se retira, se deshabilita o queda en un panel ocultado, se enfoca una pestaña habilitada o un destino informativo útil cuando no queda ninguna. Cambiar datos mientras el usuario está en otro control de la página no le roba el foco.
+
+El helper contempla raíces abiertas anidadas y contenido proyectado. No necesita un listener de teclado en `window` ni un observador global. Las pruebas de navegador deben comprobar además el comportamiento real de foco y lectura; JSDOM no certifica interoperabilidad ni experiencia con lector de pantalla.
+
+## Lit: identidad y propiedad del render
+
+<details>
+  <summary>Consultar la versión Lit completa</summary>
+  <Code code={source} lang="ts" />
+</details>
+
+`repeat` usa el ID como clave para mantener identidad al reordenar. Los métodos de render separan botón y panel sin contener efectos de negocio. El efecto de recuperación se ejecuta tras actualización cuando existe una referencia pendiente; no se solicita otro render incondicional desde `updated()`.
+
+La versión nativa tiene un reconciliador pequeño y un mapa de nodos. La selección solo sincroniza atributos y visibilidad; no reemplaza todo el árbol. Esa lógica manual aporta control, pero aumenta las responsabilidades de mantenimiento. Lit reduce esa parte a bindings y claves a cambio de su ciclo reactivo y dependencia.
+
+## Limpieza, responsive y estados perceptibles
+
+Nativo añade sus handlers de lista al conectar y los retira al desconectar, con funciones estables. Los listeners de template de Lit pertenecen a sus nodos; los handlers de interacción comprueban conexión. Los laboratorios limpian sus suscripciones entre componentes al desmontar y reconectar, sin multiplicar notificaciones.
+
+El tablist permite ajuste de línea, botones con área mínima útil y texto que puede envolver. Los paneles ocultos usan una regla interna explícita de `hidden`. Foco y selección no dependen solo del color; forced colors conserva bordes distinguibles. No se añade una animación que retrase el cambio ni haga necesaria una espera visual para interactuar.
+
+## Errores frecuentes, resumen y entrevista
+
+No declares accesibilidad completa por pasar axe ni ocultes una pestaña únicamente mediante opacity. No reconstruyas los botones para cambiar `aria-selected` y luego intentes restaurar foco con un timeout arbitrario. No ignores un error de datos duplicados para conservar una UI ambiguamente enlazada.
+
+**Resumen:** termina estados vacíos, dinámicos y de foco antes de añadir abstracciones. **Entrevista:** ¿es siempre correcto mover foco a la pestaña seleccionada tras recibir datos? No: si el usuario está fuera del widget, eso interrumpe su tarea; recupera solo foco que ya pertenecía al componente y perdió validez.
+
+## Referencias oficiales
+
+- [WAI-ARIA APG: Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/).
+- [Lit: repeat e identidad](https://lit.dev/docs/templates/lists/#the-repeat-directive).
+- [HTML: hidden](https://html.spec.whatwg.org/multipage/interaction.html#the-hidden-attribute).
+
+<Progress lessonId="dom-finishing" />
+
+<Navigation current="07-finishing" end />

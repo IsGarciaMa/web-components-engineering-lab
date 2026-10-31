@@ -1,0 +1,6 @@
+flowchart LR
+  C[Captura del consumidor] --> H[Host retargeteado]
+  H --> R[Raíz shadow]
+  R --> B[Botón emisor]
+  B --> U[Burbujeo según flags]
+  U --> D[Consumidor observa payload]

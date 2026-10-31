@@ -1,0 +1,48 @@
+---
+import { domLessons, domLessonHref } from '../../data/working-with-dom';
+---
+
+<div class="using-chapter not-content">
+  <p class="eyebrow">CAPÍTULO 03 · DISPONIBLE · 8 LECCIONES</p>
+  <p class="page-lead">
+    Del nodo al contrato. Construye Tabs accesibles y observa cómo atributos,
+    propiedades y eventos coordinan estado y contenido. Compara una
+    implementación manual con Lit.
+  </p>
+  <div class="using-chapter-meta">
+    <span>255 min de lectura y práctica orientativos</span><span
+      >4 laboratorios</span
+    ><span>3 ejercicios progresivos</span>
+  </div>
+  <div class="hero-actions">
+    <a class="lab-button primary" href={domLessonHref(domLessons[0].slug)}
+      >Empezar el capítulo →</a
+    ><a class="lab-button secondary" href="/laboratorios/working-with-dom/"
+      >Explorar laboratorios</a
+    >
+  </div>
+  <ol class="using-lesson-grid">
+    {
+      domLessons.map((lesson, index) => (
+        <li>
+          <>
+            <span class="chapter-number">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+            <div>
+              <>
+                <h2>
+                  <a href={domLessonHref(lesson.slug)}>{lesson.title}</a>
+                </h2>
+                <p>{lesson.outcome}</p>
+                <span class="section-note">
+                  {lesson.minutes} min · explicación, demo y autoevaluación
+                </span>
+              </>
+            </div>
+          </>
+        </li>
+      ))
+    }
+  </ol>
+</div>

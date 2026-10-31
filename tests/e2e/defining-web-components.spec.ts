@@ -272,14 +272,14 @@ test('conserva progreso anterior y las soluciones cerradas; sirve Marp', async (
   await page.goto(definingLessonHref('05-lifecycle'));
   const progress = page.locator('lab-learning-progress');
   await expect(
-    progress.getByText('1 de 17 lecciones disponibles completadas.'),
+    progress.getByText('1 de 25 lecciones disponibles completadas.'),
   ).toBeVisible();
   await progress
     .getByRole('button', { name: 'Marcar lección como completada' })
     .click();
   await page.reload();
   await expect(
-    progress.getByText('2 de 17 lecciones disponibles completadas.'),
+    progress.getByText('2 de 25 lecciones disponibles completadas.'),
   ).toBeVisible();
   for (const slug of ['01-basico', '02-intermedio', '03-avanzado']) {
     await page.goto(`/ejercicios/defining-web-components/${slug}/`);

@@ -1,3 +1,4 @@
+import { domLessons, domLessonHref } from './working-with-dom';
 import { definingLessons, definingLessonHref } from './defining-web-components';
 import { usingLessons, usingLessonHref } from './using-web-components';
 
@@ -46,15 +47,16 @@ export const chapters: readonly Chapter[] = [
     ],
   },
   {
-    slug: '03-atributos-propiedades',
-    title: 'Atributos, propiedades y contratos',
+    slug: '03-working-with-dom',
+    title: 'Working with the DOM',
     description:
-      'Diseña entradas predecibles para quienes usan tus componentes.',
+      'Construye Tabs accesibles con atributos, propiedades, eventos y selección.',
     stage: 'Estándares web',
-    status: 'pending',
+    status: 'available',
     objectives: [
-      'Convertir y reflejar valores con reglas explícitas.',
-      'Verificar valores iniciales y entradas inválidas.',
+      'Diseñar contratos de atributos, propiedades y eventos.',
+      'Construir Tabs con foco y selección accesibles.',
+      'Comparar actualización manual y reactividad de Lit.',
     ],
   },
   {
@@ -166,5 +168,10 @@ export const publishedLessons = [
     id: lesson.id,
     title: lesson.title,
     href: definingLessonHref(lesson.slug),
+  })),
+  ...domLessons.map((lesson) => ({
+    id: lesson.id,
+    title: lesson.title,
+    href: domLessonHref(lesson.slug),
   })),
 ];

@@ -1,0 +1,42 @@
+---
+title: 'Event Propagation Explorer'
+description: 'Registra dispatch y listeners reales sin simular fases.'
+---
+
+import Demo from '../../../../components/dom/demo.astro';
+
+[← Cuatro laboratorios del capítulo](/laboratorios/working-with-dom/)
+
+## Objetivo
+
+Registra dispatch y listeners reales sin simular fases. Predice el efecto antes de actuar y anota qué objeto o estado debería cambiar.
+
+## Experiencia ejecutable
+
+<Demo kind="eventos">
+  <p>Registra dispatch y listeners reales sin simular fases.</p>
+</Demo>
+
+## Recorrido reproducible
+
+1. Emite con los tres flags activos y compara target y currentTarget.
+2. Limpia el registro, desactiva bubbles y observa captura y hosts.
+3. Limpia de nuevo y desactiva composed: compara el alcance.
+4. Activa preventDefault con cancelable verdadero y lee el resultado de dispatchEvent.
+5. Desactiva cancelable y repite: la petición de cancelación no cambia defaultPrevented.
+
+## Explicación técnica y buenas prácticas
+
+Captura el snapshot durante el listener. Cancelar no detiene propagación; el registro máximo de doce filas mantiene acotada la observación. Consulta las fuentes reales del panel: consumidor, componente y contrato. No se ejecuta código editable ni se fabrican eventos para aparentar soporte.
+
+## Accesibilidad y errores frecuentes
+
+Los controles tienen nombre y foco visible. En Tabs, flechas recorren solo habilitadas, Home y End van a extremos, Enter y Espacio confirman; la activación es manual. Tab permite salir hacia el panel y el resto de la página. No uses solo color para interpretar selección.
+
+No confundas revisión de código con pruebas de navegador: axe, responsive y teclado real están preparados para CI compatible. La comprobación manual con zoom y lector de pantalla sigue siendo necesaria para evaluar la experiencia completa.
+
+## Explica lo observado
+
+¿Qué dato cambió y quién era su propietario? Formula un caso que detectaría una regresión del comportamiento anterior. Distingue API del navegador y decisión particular del contrato de Tabs.
+
+[Lección relacionada](/capitulos/03-working-with-dom/05-events/) · [Referencia oficial](https://developer.mozilla.org/en-US/docs/Web/API/Event/composedPath)

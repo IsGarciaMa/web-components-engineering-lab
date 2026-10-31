@@ -39,7 +39,7 @@ describe('integración de laboratorios', () => {
     expect(definingLessons).toHaveLength(9);
     expect(definingLabs).toHaveLength(8);
     expect(new Set(definingLessons.map((item) => item.id)).size).toBe(9);
-    expect(publishedLessons).toHaveLength(17);
+    expect(publishedLessons).toHaveLength(25);
     expect(
       parseProgress(
         '{"version":2,"completedIds":["using-libraries","defining-lifecycle"]}',

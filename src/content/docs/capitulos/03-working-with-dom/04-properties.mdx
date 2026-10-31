@@ -1,0 +1,93 @@
+---
+title: 'Properties'
+description: 'DOM y contratos de Tabs: Properties, código real y decisiones de ingeniería.'
+sidebar:
+  order: 4
+---
+
+import Navigation from '../../../../components/dom/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/dom/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/dom/tabs-contract.ts?raw';
+import diagram from '../../../../../diagrams/dom-properties.mmd?raw';
+
+<Navigation current="04-properties" />
+
+## Introducción y objetivos
+
+Las propiedades pertenecen al objeto JavaScript. Pueden expresar valores primitivos, colecciones y funciones sin serialización HTML. El DOM no transforma automáticamente cualquier asignación de una propiedad personalizada en una actualización visual: el autor debe conectar entrada y comportamiento.
+
+Aprenderás a diseñar setters y tipos públicos, distinguir estado privado de API y recuperar asignaciones anteriores al registro. Compararás la sincronización manual con una propiedad reactiva de Lit.
+
+## Propiedad y atributo: relaciones elegidas
+
+| Dato                  | Propiedad                   | Atributo   | Sincronización                            |
+| --------------------- | --------------------------- | ---------- | ----------------------------------------- |
+| Selección             | `selected: string`          | `selected` | Refleja ID efectivo tras configurar items |
+| Interacción bloqueada | `disabled: boolean`         | `disabled` | Presencia booleana                        |
+| Nombre del grupo      | `label: string`             | `label`    | Entrada de texto para tablist             |
+| Metadatos             | `items: readonly TabItem[]` | Ninguno    | Copia y valida al asignar                 |
+| Foco interno          | Campo privado               | Ninguno    | No es una entrada pública reflejada       |
+
+El estado seleccionado es público porque el consumidor necesita controlarlo. El ID enfocado sirve a la navegación manual y se mantiene privado: exponer cada detalle de interacción dificultaría la evolución del componente. No toda variable necesita un atributo.
+
+<Diagram
+  source={diagram}
+  caption="La validación pertenece al contrato; la asignación por sí sola no proporciona un sistema reactivo al HTMLElement."
+/>
+
+## Laboratorio y contrato TypeScript
+
+<Demo kind="inspector">
+  <p>
+    Compara setAttribute y asignación de selected. Ambas rutas llegan a una
+    política de selección común. items sigue siendo una colección JavaScript; la
+    UI cambia porque el setter implementa esa actualización.
+  </p>
+</Demo>
+
+<Code code={source} lang="ts" />
+
+### Getters, setters y colecciones
+
+La versión nativa guarda campos privados y ejecuta sincronización explícita cuando cambian entradas. Una clase con un campo `selected = 'intro'` sin setter ni lógica asociada no tendría ese comportamiento. TypeScript describe el contrato; no añade un observador DOM al campo.
+
+`items` se copia y congela al asignar. El consumidor actualiza mediante un array nuevo; modificar el array original no altera silenciosamente el componente. Cada objeto contiene solo ID, etiqueta y estado deshabilitado. Esto evita que un cambio profundo ambiguo se cuele sin una operación de API, y hace predecible la comparación con Lit.
+
+Un setter puede validar datos de JavaScript aunque el tipo sea correcto en el proyecto. Los IDs duplicados o etiquetas vacías provocan error antes de sustituir el conjunto vigente. No silencies ese fallo con un cast ni transformes datos inválidos en una colección aparentemente correcta sin avisar.
+
+## Asignaciones antes del registro
+
+```ts
+const host = document.createElement('lab-native-tabs');
+// Si todavía no está registrado, selected puede convertirse en propiedad propia.
+Object.assign(host, { selected: 'events' });
+```
+
+Una propiedad propia puede ocultar el accessor del prototipo después del upgrade. Al conectar, la versión nativa recupera `items`, `selected`, `disabled` y `label`: lee el valor, elimina la propiedad propia y lo reasigna a través del setter. Recupera `items` antes de validar la selección y respeta la precedencia de la propiedad previa sobre el atributo inicial.
+
+La recuperación ocurre en conexión: no prometemos que un fragmento desconectado haya procesado ya todas sus propiedades previas. Un consumidor que necesita utilizar el contrato antes puede coordinar definición y configuración explícitamente. `whenDefined` espera la definición, no su primera actualización ni su conexión.
+
+## Qué añade Lit
+
+`@property` instala acceso reactivo y solicita actualizaciones; `@state` mantiene el ID enfocado como detalle interno del render. El setter de `items` y el de `selected` conservan las reglas de dominio. `render()` solo deriva la UI y `repeat` mantiene identidad por ID.
+
+Lit tiene gestión propia de valores anteriores al upgrade; no insertes a ciegas el mismo bloque manual de recuperación en ambas clases. Espera `updateComplete` al leer su vista. La propiedad puede tener el nuevo valor antes de que el DOM y el atributo reflejado estén actualizados.
+
+## Buenas prácticas, resumen y entrevista
+
+No dupliques tres fuentes de verdad que se escriban entre sí sin dirección clara. Distingue API de entrada y notificaciones: asignar `selected` no emite un cambio de usuario y permite sincronizar dos instancias sin bucles. No reflejes objetos ni asumas que congelar un objeto superficial resuelve cualquier estructura profunda; aquí el contrato solo contiene primitivas.
+
+**Resumen:** una propiedad pública necesita tipos, validación y semántica de actualización. **Entrevista:** ¿por qué un `selected` temprano puede dejar de invocar el setter tras cargar el módulo? Porque la propiedad propia oculta el accessor del prototipo hasta que se recupera deliberadamente.
+
+## Referencias oficiales
+
+- [HTML: requisitos y upgrade](https://html.spec.whatwg.org/multipage/custom-elements.html).
+- [Lit: propiedades reactivas](https://lit.dev/docs/components/properties/).
+- [TypeScript: clases y accessors](https://www.typescriptlang.org/docs/handbook/2/classes.html).
+
+<Progress lessonId="dom-properties" />
+
+<Navigation current="04-properties" end />

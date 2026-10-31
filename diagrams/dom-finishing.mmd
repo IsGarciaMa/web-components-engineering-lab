@@ -1,0 +1,7 @@
+flowchart TD
+  I[Nuevo array items] --> V[Validar sin perder estado anterior]
+  V --> S[Normalizar selección]
+  S --> R[Reconciliar por ID]
+  R --> F{Foco anterior sigue válido}
+  F -->|Sí| C[Conservar]
+  F -->|No| A[Recuperar dentro del widget]

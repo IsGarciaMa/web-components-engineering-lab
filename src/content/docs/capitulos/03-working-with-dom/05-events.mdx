@@ -1,0 +1,93 @@
+---
+title: 'Events'
+description: 'DOM y contratos de Tabs: Events, código real y decisiones de ingeniería.'
+sidebar:
+  order: 5
+---
+
+import Navigation from '../../../../components/dom/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/dom/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/dom/event-probe.ts?raw';
+import diagram from '../../../../../diagrams/dom-events.mmd?raw';
+
+<Navigation current="05-events" />
+
+## Introducción y objetivos
+
+Los eventos permiten comunicar una intención o un hecho sin que el consumidor conozca la implementación interna. `EventTarget` proporciona registro, retirada y dispatch; los elementos DOM añaden un recorrido por sus árboles. No todo `EventTarget` tiene un padre DOM.
+
+Aprenderás a separar payload, propagación y cancelación, observar retargeting y diseñar un protocolo público mínimo. El laboratorio usa `dispatchEvent` y listeners reales; no calcula un recorrido teórico para presentarlo como prueba del navegador.
+
+## Event y CustomEvent
+
+`Event` contiene tipo, fase y opciones. `CustomEvent` añade `detail`, cuyo tipo y significado debe documentar el autor. Un genérico TypeScript ayuda al productor; no convierte cualquier evento externo del mismo nombre en un payload validado. El consumidor de Tabs comprueba datos antes de utilizarlos.
+
+<Code code={source} lang="ts" />
+
+Un CustomEvent despachado por JavaScript tiene isTrusted falso: su dispatch y propagación son reales, aunque no sea un evento confiable generado directamente por el navegador.
+
+El emisor de exploración publica solo `{ action: 'inspect' }`. Tabs publica `{ previous, selected, source }`. Ninguno necesita entregar el botón interno, el estado completo del componente o datos de otros paneles para comunicar una selección.
+
+## Recorrido y opciones
+
+| Opción       | Pregunta que resuelve                                          | No significa                                         |
+| ------------ | -------------------------------------------------------------- | ---------------------------------------------------- |
+| `bubbles`    | ¿Recorre ancestros en fase de burbujeo?                        | Que nadie pueda observarlo en captura si es false    |
+| `composed`   | ¿Puede atravesar límites shadow según el recorrido del evento? | Que se exponga cualquier interior de una raíz closed |
+| `cancelable` | ¿Puede `preventDefault` cancelar la acción acordada?           | Que se detenga la propagación                        |
+
+<Diagram
+  source={diagram}
+  caption="Captura, destino y burbujeo son observaciones del dispatch; los límites shadow pueden cambiar el target visto por cada listener."
+/>
+
+### Un caso que suele explicarse mal
+
+Un evento con `bubbles: false` puede observarse en captura por ancestros de su recorrido. Si además es `composed: true`, los hosts en el cruce shadow tienen tratamiento de destino según las reglas de dispatch; no reduzcas toda la propagación a «solo sale si ambos son true». En cambio, con `composed: false`, un evento originado en el botón interno queda limitado por su raíz para este experimento.
+
+`target` es el destino visto desde ese contexto y puede ser retargeteado al host al cruzar el límite. `currentTarget` es el objeto cuyo listener se está ejecutando. `composedPath()` permite consultar el recorrido expuesto durante dispatch; una raíz closed oculta parte de su interior al observador externo. La lista no es una promesa de exponer todos los nodos privados de cualquier árbol.
+
+## Laboratorio de propagación real
+
+<Demo kind="eventos">
+  <p>
+    Limpia el registro antes de cambiar una opción. Compara el listener de raíz
+    con el del consumidor: target y currentTarget difieren. Desactiva bubbles
+    manteniendo composed y observa captura. Después desactiva composed y
+    comprueba qué listeners dejan de recibir el evento.
+  </p>
+</Demo>
+
+El laboratorio toma un snapshot síncrono dentro de cada listener. Fuera de esa ejecución `currentTarget` ya no representa aquel punto y no debes reconstruir la observación leyendo el mismo objeto tarde. Las filas incluyen fases, flags, payload y recorrido reales; el registro conserva las últimas doce observaciones.
+
+## Cancelación y contrato Tabs
+
+`before-tab-change` representa una intención cancelable. Si un listener llama a `preventDefault()`, `dispatchEvent()` devuelve `false` y el componente no confirma la selección. `tab-change` comunica el cambio ya confirmado y no es cancelable. Llamar a `preventDefault` en ese segundo evento no revierte una operación terminada.
+
+La cancelación es síncrona. Esperar una promesa dentro del listener y cancelar después no retrocede el dispatch que ya terminó. Si tu producto necesita confirmación asíncrona, diseña otro protocolo, sin fingir que `cancelable` aporta ese flujo automáticamente. Un listener pasivo tampoco puede cancelar mediante `preventDefault`.
+
+`stopPropagation()` afecta al recorrido de listeners, no equivale a cancelar la acción de la aplicación. Mantén ambas decisiones separadas. En el laboratorio cancelar no impide que los listeners posteriores registren el evento; observa cómo cambia `defaultPrevented`.
+
+## Listeners, limpieza y Lit
+
+Retira un listener usando la misma función y el mismo valor de captura relevantes para su registro. El explorador conserva funciones de limpieza y las ejecuta al desconectar; reconectar no multiplica filas por suscripciones duplicadas. Un listener de un nodo propio no implica por sí mismo una fuga global.
+
+Lit ofrece bindings `@event` para nodos de sus templates. No añade un canal de eventos distinto del DOM. Tabs emite en su host: para un listener conectado directamente a Tabs, target es ese host. Un observador que cruza otra raíz puede ver otro target por retargeting. El emisor del explorador está dentro de su raíz y permite observar esa diferencia.
+
+## Resumen y entrevista
+
+Diseña el nombre, payload, origen, cancelación y alcance como un contrato. **Entrevista:** ¿`preventDefault` detiene el burbujeo? No; cancela la acción acordada si el evento lo permite. El recorrido puede continuar y los listeners siguientes observan el estado cancelado.
+
+## Referencias oficiales
+
+- [DOM: eventos y algoritmo de dispatch](https://dom.spec.whatwg.org/#events).
+- [MDN: composedPath](https://developer.mozilla.org/en-US/docs/Web/API/Event/composedPath).
+- [MDN: preventDefault](https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault).
+- [Lit: eventos](https://lit.dev/docs/components/events/).
+
+<Progress lessonId="dom-events" />
+
+<Navigation current="05-events" end />

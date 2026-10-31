@@ -13,7 +13,7 @@ CounterDemo → scripts del navegador → examples/native + examples/lit
 examples/native + examples/lit → examples/shared
 ```
 
-`src/data/curriculum.ts` contiene el índice editorial y los objetivos de once capítulos. Las páginas MDX de los nueve capítulos pendientes mantienen sus URLs y componen `chapter-overview.astro`. Los capítulos 01 y 02 están publicados con mapas y siete/nueve lecciones respectivamente; sus URLs iniciales del scaffold redirigen a las actuales. La lección introductoria de PR-00 sigue siendo independiente. La plantilla reúne objetivos, índice, documentación, ejemplos/laboratorios, ejercicios, presentaciones, referencias y siguiente contenido; distingue recursos iniciales disponibles de material futuro.
+`src/data/curriculum.ts` contiene el índice editorial y los objetivos de once capítulos. Las páginas MDX de los ocho capítulos pendientes mantienen sus URLs y componen `chapter-overview.astro`. Los capítulos 01, 02 y 03 están publicados con mapas y siete/nueve/ocho lecciones respectivamente; sus URLs iniciales del scaffold redirigen a las actuales. La lección introductoria de PR-00 sigue siendo independiente. La plantilla reúne objetivos, índice, documentación, ejemplos/laboratorios, ejercicios, presentaciones, referencias y siguiente contenido; distingue recursos iniciales disponibles de material futuro.
 
 El contenido de la lección permanece en Markdown/MDX. El laboratorio es un consumidor independiente: registra `count-change`, valida el payload, conserva hasta ocho filas y limpia únicamente el registro. No altera el Shadow DOM de los ejemplos. Sus listeners se retiran al desconectar. Los archivos fuente se importan con `?raw` y se muestran escapados con `Code` público de Starlight, sin ejecutar entradas editables.
 
@@ -21,7 +21,7 @@ Los Custom Elements solo se importan en scripts de navegador, nunca en frontmatt
 
 ## Estado y persistencia
 
-Cada contador y cada demo mantienen su estado local. `lab-learning-progress` usa Lit y persistencia optativa en `lab-learning-progress-v2`. El esquema versionado guarda IDs de lecciones completadas, limita el denominador a las diecisiete disponibles y valida los datos al leer. Los datos v1 se leen como avance de la lección inicial cuando falta v2; esta migración de lectura no escribe hasta una acción posterior del usuario.
+Cada contador y cada demo mantienen su estado local. `lab-learning-progress` usa Lit y persistencia optativa en `lab-learning-progress-v2`. El esquema versionado guarda IDs de lecciones completadas, limita el denominador a las veinticinco disponibles y valida los datos al leer. Los datos v1 se leen como avance de la lección inicial cuando falta v2; esta migración de lectura no escribe hasta una acción posterior del usuario.
 
 Se puede marcar/desmarcar una lección y borrar/desactivar el seguimiento, retirando ambas claves. Los fallos de lectura, guardado o borrado se comunican sin bloquear contenido. No hay autenticación, telemetría, sincronización entre dispositivos ni store global. Publicar más lecciones requiere ampliar el índice admitido; no se contabilizan capítulos pendientes ni se certifica aprendizaje.
 
@@ -61,4 +61,18 @@ El visualizador crea una sonda nativa separada de Lit. Las dos regiones vacías 
 
 Los medidores nativo y Lit comparten normalización y contrato de datos, con diferencias explícitas de actualización y representación intermedia del atributo. La asignación de slots no modifica la propiedad de los hijos Light DOM. Las plantillas reciben datos con textContent. moveBefore y el built-in personalizado detectan soporte; nunca condicionan la navegación del portal.
 
-La ruta antigua del capítulo 02 redirige estáticamente. Se añaden nueve IDs al esquema v2 de progreso sin cambiar clave ni perder los IDs publicados antes. No cambia el sistema de navegación ni se inicia PR-03. La presentación se descubre mediante el directorio Marp existente.
+La ruta antigua del capítulo 02 redirige estáticamente. Se añaden nueve IDs al esquema v2 de progreso sin cambiar clave ni perder los IDs publicados antes. En PR-02 se conservó el sistema de navegación, sin iniciar entonces PR-03. La presentación se descubre mediante el directorio Marp existente.
+
+## Capítulo 03: DOM y contrato de Tabs
+
+`data/working-with-dom.ts` publica ocho lecciones y cuatro laboratorios. Las envolturas Astro reutilizan el panel y las clases visuales existentes; no hay un nuevo shell de navegación. Los ejemplos solo se importan como clases en navegador y como texto escapado mediante `?raw` para documentación.
+
+`examples/dom/tabs-contract.ts` concentra tipos y funciones puras de validación, navegación y protocolo. Nativo y Lit tienen render propio: mapa de nodos por ID frente a `html`/`repeat`. No comparten una clase base que oculte esa diferencia. `items` es propiedad con copia defensiva; `selected` es un ID reflejado y normalizado, con una preferencia pendiente hasta configurar items. Disabled bloquea tabs sin borrar el panel seleccionado. Las escrituras externas y las normalizaciones son silenciosas.
+
+Se elige activación manual: foco y selección son distintos. Los botones tab y los contenedores tabpanel viven en una misma raíz para resolver sus IDs ARIA; slots nombrados proyectan nodos Light DOM que siguen perteneciendo al consumidor. El componente nunca reubica esos nodos ni modifica los que Lit gestiona. Las raíces internas conservan IDs estables por instancia e item.
+
+El foco solo se recupera si ya pertenecía al widget y queda retirado, deshabilitado u ocultado; reordenamientos conservan identidad. No hay listeners de teclado globales ni observers genéricos. El nativo retira handlers al desconectar; Lit conserva listeners de sus nodos y protege la interacción desconectada. Los puentes de laboratorio retiran sus suscripciones entre instancias.
+
+La intención `before-tab-change` es cancelable y el hecho `tab-change` no lo es; ambos transportan IDs y origen, sin referencias internas. Se vuelve a validar tras la intención para respetar cambios externos durante dispatch. El explorador adicional despacha desde un botón shadow y toma snapshots síncronos de eventos reales, con doce filas como máximo.
+
+El registro local es opcional y verifica asociación e instancia. Una pequeña región vacía del demo es el único montaje imperativo local: Lit gestiona el contenedor y el experimento sus hijos. Tabs y el portal conservan el registro global. Se añaden ocho IDs al progreso v2 sin cambiar clave ni datos previos; no se inicia PR-04.

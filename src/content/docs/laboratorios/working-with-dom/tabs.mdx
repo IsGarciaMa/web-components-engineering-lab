@@ -1,0 +1,43 @@
+---
+title: 'Tabs Component Playground'
+description: 'Conserva identidad, contenido y foco al cambiar datos.'
+---
+
+import Demo from '../../../../components/dom/demo.astro';
+
+[← Cuatro laboratorios del capítulo](/laboratorios/working-with-dom/)
+
+## Objetivo
+
+Conserva identidad, contenido y foco al cambiar datos. Predice el efecto antes de actuar y anota qué objeto o estado debería cambiar.
+
+## Experiencia ejecutable
+
+<Demo kind="tabs">
+  <p>Conserva identidad, contenido y foco al cambiar datos.</p>
+</Demo>
+
+## Recorrido reproducible
+
+1. Usa flechas en Nativo y después Enter para activar.
+2. Compara la misma operación en Lit.
+3. Selecciona Contrato y deshabilítala: se elige la primera habilitada.
+4. Añade un panel; vacía y restaura el conjunto.
+5. Actualiza el contenido proyectado: cambia texto sin sustituir el host ni apropiarse de los nodos.
+6. Inspecciona árboles: el host conserva contenido y la raíz contiene los controles.
+
+## Explicación técnica y buenas prácticas
+
+No reconstruyas todo el árbol para cambiar una selección. Mantén IDs estables y no modifiques contenido propiedad del consumidor. Consulta las fuentes reales del panel: consumidor, componente y contrato. No se ejecuta código editable ni se fabrican eventos para aparentar soporte.
+
+## Accesibilidad y errores frecuentes
+
+Los controles tienen nombre y foco visible. En Tabs, flechas recorren solo habilitadas, Home y End van a extremos, Enter y Espacio confirman; la activación es manual. Tab permite salir hacia el panel y el resto de la página. No uses solo color para interpretar selección.
+
+No confundas revisión de código con pruebas de navegador: axe, responsive y teclado real están preparados para CI compatible. La comprobación manual con zoom y lector de pantalla sigue siendo necesaria para evaluar la experiencia completa.
+
+## Explica lo observado
+
+¿Qué dato cambió y quién era su propietario? Formula un caso que detectaría una regresión del comportamiento anterior. Distingue API del navegador y decisión particular del contrato de Tabs.
+
+[Lección relacionada](/capitulos/03-working-with-dom/01-scaffolding/) · [Referencia oficial](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/)

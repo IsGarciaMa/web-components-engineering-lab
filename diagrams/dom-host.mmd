@@ -1,0 +1,7 @@
+flowchart TD
+  H[Host HTMLElement] --> L[section slot intro]
+  H --> R[ShadowRoot]
+  R --> B[Botón role tab]
+  R --> P[Contenedor role tabpanel]
+  P --> S[slot name intro]
+  L -. Asignación sin mover nodos .-> S
