@@ -1,0 +1,9 @@
+flowchart LR
+  C[Consumidor] --> I[items y selected]
+  I --> H[Host Tabs]
+  C --> L[Contenido Light DOM]
+  L -. Slot .-> P[Panel interno]
+  H --> T[Botones internos]
+  T --> P
+  H --> E[Evento con IDs]
+  E --> C

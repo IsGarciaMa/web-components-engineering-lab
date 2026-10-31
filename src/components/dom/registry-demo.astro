@@ -1,0 +1,24 @@
+---
+import LabPanel from '../using/lab-panel.astro';
+import example from '../../examples/dom/scoped-registry.ts?raw';
+import consumer from '../../labs/dom/registry-demo.ts?raw';
+---
+
+<LabPanel
+  title="Registro local opcional"
+  objective="Verifica una definición local sin añadirla al registro global."
+  sources={[
+    { label: 'scoped-registry.ts', code: example },
+    { label: 'registry-demo.ts', code: consumer },
+  ]}
+>
+  <lab-registry-demo></lab-registry-demo>
+  <p slot="explanation">
+    El ejemplo detecta la asociación real del registro y la instancia. Si la API
+    no está disponible, muestra el límite y mantiene el registro global del
+    portal.
+  </p>
+</LabPanel>
+<script>
+  import '../../labs/dom/registry-demo';
+</script>

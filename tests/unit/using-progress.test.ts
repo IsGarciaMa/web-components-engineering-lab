@@ -23,10 +23,10 @@ function button(element: LearningProgress, name: string) {
   return control;
 }
 describe('progreso versionado y ruta publicada', () => {
-  it('ofrece siete lecciones con rutas únicas y diecisiete unidades de progreso', () => {
+  it('ofrece siete lecciones con rutas únicas y veinticinco unidades de progreso', () => {
     expect(usingLessons).toHaveLength(7);
-    expect(publishedLessons).toHaveLength(17);
-    expect(new Set(publishedLessons.map((lesson) => lesson.id)).size).toBe(17);
+    expect(publishedLessons).toHaveLength(25);
+    expect(new Set(publishedLessons.map((lesson) => lesson.id)).size).toBe(25);
     expect(usingLessonHref(usingLessons[0].slug)).toBe(
       '/capitulos/01-using-web-components/01-bibliotecas/',
     );
@@ -79,7 +79,7 @@ describe('progreso versionado y ruta publicada', () => {
     const element = new LearningProgress();
     document.body.append(element);
     await element.updateComplete;
-    expect(element.shadowRoot?.textContent).toMatch(/1 de 17/);
+    expect(element.shadowRoot?.textContent).toMatch(/1 de 25/);
     expect(localStorage.getItem(progressStorageKey)).toBeNull();
     button(element, 'Borrar y desactivar progreso').click();
     await element.updateComplete;

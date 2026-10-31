@@ -1,0 +1,92 @@
+---
+title: 'Host DOM'
+description: 'DOM y contratos de Tabs: Host DOM, código real y decisiones de ingeniería.'
+sidebar:
+  order: 2
+---
+
+import Navigation from '../../../../components/dom/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/dom/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/dom/native-tabs.ts?raw';
+import diagram from '../../../../../diagrams/dom-host.mmd?raw';
+
+<Navigation current="02-host-dom" />
+
+## Introducción y objetivos
+
+Dentro de un Custom Element, `this` es el host: una instancia de `HTMLElement` con atributos, propiedades e hijos. No es su `ShadowRoot` ni una referencia implícita a todos los nodos que se dibujan visualmente dentro de él.
+
+Aprenderás a consultar cada árbol, reconocer relaciones padre/hijo y decidir quién puede actualizar un nodo. Esta distinción explica por qué una consulta vacía no demuestra que un botón no exista.
+
+## Tres referencias, tres ámbitos
+
+| Expresión                                        | Objeto o búsqueda                                           |
+| ------------------------------------------------ | ----------------------------------------------------------- |
+| `this`                                           | Host del componente                                         |
+| `this.querySelector('section')`                  | Descendientes Light DOM del host                            |
+| `this.shadowRoot`                                | Raíz abierta asociada al host, si existe                    |
+| `this.shadowRoot?.querySelector('[role="tab"]')` | Botón de la implementación en esa raíz                      |
+| `this.parentNode`                                | Padre del host en su árbol                                  |
+| `this.isConnected`                               | Conexión a un documento, también a través de árboles shadow |
+
+`querySelector` devuelve la primera coincidencia o `null`; `querySelectorAll` devuelve una lista estática de coincidencias. No atraviesan automáticamente cada raíz shadow de la página. Guardar un resultado y después cambiar la estructura no convierte esa lista en una vista viva.
+
+<Diagram
+  source={diagram}
+  caption="El panel del consumidor sigue siendo hijo del host; el contenedor ARIA y el slot pertenecen a la raíz de implementación."
+/>
+
+## Laboratorio: observar ambos árboles
+
+<Demo kind="tabs">
+  <p>
+    Pulsa Inspeccionar árboles: hostQueryForTabs debe ser cero y
+    shadowQueryForTabs coincidir con los metadatos. childParentIsHost comprueba
+    la relación real del nodo proyectado. Añadir un panel modifica ambos
+    recuentos por responsabilidades diferentes.
+  </p>
+</Demo>
+
+Los slots componen la presentación. Un `section` proyectado no pasa a tener como padre el `slot` ni el `ShadowRoot`. El consumidor puede seguir actualizando su texto. El componente decide qué contenedor interno está visible mediante `hidden`; no necesita trasladar el contenido para seleccionarlo.
+
+## Propiedad de los nodos
+
+En el proyecto hay tres propietarios: el portal Astro entrega el host; el laboratorio Lit crea sus hijos Light DOM; cada implementación Tabs controla sus botones y contenedores shadow. La versión nativa puede crear y reconciliar esos nodos internos porque es su autora. La versión Lit debe dejar sus nodos internos a los templates de Lit.
+
+<details>
+  <summary>Consultar la implementación nativa completa</summary>
+  <Code code={source} lang="ts" />
+</details>
+
+El reconciliador conserva un mapa por ID. Cuando solo cambia la selección, actualiza estado sin reconstruir toda la raíz. Al cambiar `items`, crea o retira únicamente los pares necesarios y conserva los IDs de los elementos existentes. Así una operación de selección no destruye por sistema referencias y foco.
+
+## Consultas y conexión
+
+Una referencia obtenida con `querySelector` puede corresponder a un nodo desconectado. Tener un objeto no garantiza que se pueda medir como parte de la página, que tenga el tamaño final ni que conserve foco. Separa existencia de conexión; no vuelvas a tratar aquí los callbacks como una secuencia fija.
+
+En un árbol de raíces anidadas, `document.activeElement` puede ser un host exterior. El helper `activeWithin()` desciende por raíces abiertas activas y comprueba si el nodo pertenece al componente o a sus hijos proyectados. Es una herramienta concreta para restaurar foco, no una API que exponga internals a todos los consumidores.
+
+## Buenas prácticas y errores frecuentes
+
+No uses `document.querySelector` con IDs globales para buscar un panel interno: consulta la raíz que lo contiene. Tampoco utilices una referencia al Shadow DOM de otro componente para modificar estado que tiene setter público. Que una raíz sea abierta facilita inspección, pero no convierte todos sus nodos en un contrato estable.
+
+No escribas `innerHTML` sobre el host si otra librería gestiona sus hijos. Podrías perder listeners, nodos activos y estado sin que su renderer lo sepa. Para HTML dinámico de procedencia externa se necesitan reglas de confianza; en estos ejemplos las etiquetas internas son constantes y los textos se asignan de forma segura.
+
+## Comparación con Lit, resumen y entrevista
+
+Lit suele crear una raíz y renderizar en ella; `renderRoot` expresa su destino de render y no siempre equivale necesariamente a una raíz shadow si el autor lo ha personalizado. En esta implementación sí usamos la raíz predeterminada. Las consultas de observación no sustituyen los bindings de actualización.
+
+**Resumen:** consulta el árbol adecuado y modifica solo los nodos que posees. **Entrevista:** ¿por qué un panel puede verse junto a un botón shadow y seguir siendo hijo Light DOM del host? Porque la asignación por slot afecta a composición, no a su `parentNode`.
+
+## Referencias oficiales
+
+- [DOM: árboles y consultas](https://dom.spec.whatwg.org/).
+- [MDN: Shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM).
+- [Lit: Shadow DOM y renderRoot](https://lit.dev/docs/components/shadow-dom/).
+
+<Progress lessonId="dom-host" />
+
+<Navigation current="02-host-dom" end />

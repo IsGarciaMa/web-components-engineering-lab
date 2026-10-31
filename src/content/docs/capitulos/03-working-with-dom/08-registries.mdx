@@ -1,0 +1,77 @@
+---
+title: 'Custom Element Registries'
+description: 'DOM y contratos de Tabs: Custom Element Registries, código real y decisiones de ingeniería.'
+sidebar:
+  order: 8
+---
+
+import Navigation from '../../../../components/dom/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/dom/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/dom/scoped-registry.ts?raw';
+import diagram from '../../../../../diagrams/dom-registries.mmd?raw';
+import RegistryDemo from '../../../../components/dom/registry-demo.astro';
+
+<Navigation current="08-registries" />
+
+## Introducción y objetivos
+
+Un registro asocia nombres y constructores. En los ejemplos anteriores usamos `window.customElements`: un registro global compartido por componentes de ese contexto. Integrar bibliotecas con nombres coincidentes revela el límite de esa asociación única.
+
+Aprenderás a diagnosticar colisiones, coordinar definiciones y distinguir el registro global de los scoped registries. La API local se demuestra como capacidad opcional; no es una condición para leer el capítulo ni utilizar Tabs.
+
+## Registro global
+
+`customElements.get(name)` devuelve la definición existente o `undefined`. `whenDefined(name)` permite esperar una definición futura; no espera conexión ni actualización de Lit. Definir dos veces el mismo nombre o reutilizar un constructor en definiciones incompatibles produce un error. Un guard evita una repetición local, pero no prueba que dos versiones compartan el mismo contrato.
+
+<Diagram
+  source={diagram}
+  caption="Dos registros pueden asociar el mismo nombre a clases distintas; la creación debe utilizar el registro que corresponde a cada árbol."
+/>
+
+La política habitual sigue siendo prefijos coherentes, módulo único de registro y resolución explícita de versiones. Cambiar nombres continuamente para esconder errores acumula definiciones irreversibles y no soluciona el empaquetado. No hay un `undefine` global para reiniciar una aplicación parcialmente.
+
+## Qué aportan los registros locales
+
+Un `CustomElementRegistry` independiente permite asociar nombres a clases dentro de un ámbito concreto. Una raíz shadow puede recibirlo mediante la opción `customElementRegistry` de `attachShadow`. La creación y el parseo en ese ámbito deben usar su definición; no basta con crear todos los elementos desde el documento global y moverlos después esperando cambiar retroactivamente su clase.
+
+Las APIs actuales incluyen asociaciones e inicialización de ámbitos. No desarrollamos aquí todas las variantes de documentos desconectados o raíces declarativas: el experimento utiliza una raíz nueva para mantener clara la frontera. Una raíz asociada no es un selector dinámico de versiones que debas cambiar en cada render.
+
+## Compatibilidad verificada y detección
+
+Consulta realizada el **31 de octubre de 2026**. [Chrome documenta disponibilidad desde Chromium/Edge 146](https://developer.chrome.com/blog/scoped-registries). [MDN marca customElementRegistry de ShadowRoot como disponibilidad limitada](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/customElementRegistry). El [explorador Web Platform DX](https://web-platform-dx.github.io/web-features-explorer/features/scoped-custom-element-registries/) distingue soporte de Chromium/Safari y ausencia en la versión Firefox indicada en su tabla. Las tablas pueden describir versiones diferentes: verifica la versión objetivo y la capacidad real, en vez de afirmar soporte homogéneo de todos los motores.
+
+La demo primero detecta la superficie, crea el registro cuando es posible, verifica su asociación a la raíz y comprueba la instancia resultante. El hecho de que funcione `customElements.define` globalmente no prueba que se pueda construir un registro local. La documentación consultada tampoco equivale a una ejecución de navegador en esta sesión.
+
+## Demostración opcional
+
+<RegistryDemo />
+
+<Code code={source} lang="ts" />
+
+El markup del ejemplo es una constante revisada, no entrada arbitraria. `lab-scoped-note` solo se define localmente. Pulsar de nuevo crea otro ámbito para repetir la prueba sin multiplicar nombres en el registro global. Si no hay soporte, se informa del límite; no se fabrica una instancia con una simulación.
+
+## Progressive enhancement y alternativas
+
+Para Tabs seguimos usando nombres globales distintos (`lab-native-tabs` y `lab-lit-tabs`). Un consumidor que entrega los paneles como HTML puede mantenerlos legibles antes del registro. Estos laboratorios montan su UI con Lit en cliente: requieren JavaScript para interactuar, mientras la documentación y las fuentes sí se entregan estáticamente. Si una integración necesita convivir con versiones incompatibles, evalúa alcance, soporte y estrategia de empaquetado antes de hacer de un registro local un requisito transversal.
+
+No añadas un polyfill o un iframe solo para que una demo parezca soportada. Un iframe sí crea otro contexto con implicaciones de comunicación y accesibilidad, pero no es un sustituto transparente de un registro local. Lit no elimina por sí mismo las restricciones de asociación del navegador ni registra automáticamente toda dependencia en cualquier ámbito.
+
+## Buenas prácticas, resumen y entrevista
+
+Diferencia una capacidad opcional de una dependencia del producto. Mantén errores esperados visibles y conserva el camino global funcional. No confundas aislamiento de nombres con aislamiento de seguridad: ambos componentes siguen ejecutando JavaScript con los privilegios de su entorno.
+
+**Resumen:** el nombre se resuelve en un registro concreto y la creación debe respetar ese ámbito. **Entrevista:** ¿por qué `window.customElements.get` puede no devolver una definición que sí creó una instancia dentro de una raíz local? Porque estás consultando otro registro.
+
+## Referencias oficiales
+
+- [HTML: CustomElementRegistry](https://html.spec.whatwg.org/multipage/custom-elements.html#custom-elements-api).
+- [MDN: constructor de registro local](https://developer.mozilla.org/en-US/docs/Web/API/CustomElementRegistry/CustomElementRegistry).
+- [MDN: asociación de ShadowRoot](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot/customElementRegistry).
+- [Chrome: scoped registries](https://developer.chrome.com/blog/scoped-registries).
+
+<Progress lessonId="dom-registries" />
+
+<Navigation current="08-registries" end />

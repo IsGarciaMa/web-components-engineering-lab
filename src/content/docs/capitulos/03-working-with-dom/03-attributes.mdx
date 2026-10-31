@@ -1,0 +1,93 @@
+---
+title: 'Attributes'
+description: 'DOM y contratos de Tabs: Attributes, código real y decisiones de ingeniería.'
+sidebar:
+  order: 3
+---
+
+import Navigation from '../../../../components/dom/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/dom/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/dom/native-tabs.ts?raw';
+import diagram from '../../../../../diagrams/dom-attributes.mmd?raw';
+
+<Navigation current="03-attributes" />
+
+## Introducción y objetivos
+
+Un atributo es una representación textual en un elemento. Puede servir como configuración declarativa, señal para CSS o superficie de inspección. Elegir un atributo para cada dato no hace más interoperable un componente: un array de metadatos o un callback no se expresan naturalmente como cadenas.
+
+Aprenderás a usar las operaciones de atributos de Tabs y comprender su normalización. El lifecycle ya explicado en PR-02 solo aparece aquí como mecanismo de recepción de cambios.
+
+## Operaciones de la API DOM
+
+```ts
+tabs.setAttribute('selected', 'contract');
+const raw = tabs.getAttribute('selected'); // string | null
+tabs.removeAttribute('selected');
+const present = tabs.hasAttribute('disabled');
+tabs.toggleAttribute('disabled', false); // Fuerza ausencia.
+```
+
+`getAttribute` distingue la ausencia (`null`) de una cadena vacía. `setAttribute` serializa su valor; pasar un objeto no conserva su identidad ni su estructura como propiedad JavaScript. `toggleAttribute(name, force)` controla presencia de forma explícita y evita construir cadenas booleanas ambiguas.
+
+<Diagram
+  source={diagram}
+  caption="Una escritura declarativa entra en el contrato por el callback; la normalización se refleja con un guard de igualdad."
+/>
+
+## Laboratorio: qué quedó realmente escrito
+
+<Demo kind="inspector">
+  <p>
+    Escribe contract e inspecciona propiedad y atributo. Prueba un ID
+    inexistente: se normaliza a la primera pestaña habilitada. Después escribe
+    disabled="false" y comprueba que todas las pestañas siguen deshabilitadas
+    hasta retirar el atributo.
+  </p>
+</Demo>
+
+### Política selected
+
+Tras configurar `items`, un ID válido y habilitado se conserva. Un ID vacío, desconocido o deshabilitado elige la primera pestaña habilitada; si no hay ninguna, el estado es vacío y el atributo se elimina. Por eso `removeAttribute('selected')` es una petición de valor por defecto, no una orden de dejar todas las pestañas sin seleccionar si hay alguna disponible.
+
+Antes de la primera asignación de `items`, un `selected` declarativo puede conservarse como petición pendiente. Asignar `items`, incluso `[]`, activa la validación del conjunto. Esta regla permite declarar una preferencia antes de recibir metadatos sin confundirla con una selección ya visible.
+
+### Booleanos y límites
+
+La presencia de `disabled` bloquea interacción, aunque su texto sea `"false"`, `"0"` o vacío. Retirarlo la habilita de nuevo. No borra el panel seleccionado ni deshabilita automáticamente los controles que el consumidor coloque dentro del panel: el contrato se refiere a interacción con las pestañas.
+
+`items` es una propiedad sin atributo asociado. El inspector muestra que hay un array real y que `getAttribute('items')` es `null`. No hacemos parseo implícito de JSON ni reflejamos objetos que puedan contener datos innecesarios en HTML.
+
+## observedAttributes y flujo sin ciclos
+
+La implementación nativa observa `selected`, `disabled` y `label`. El callback recibe nombre, valor anterior y valor nuevo. Para `selected` delega en el mismo setter que usa JavaScript; los otros cambios sincronizan la UI. El reflector solo escribe cuando la representación difiere.
+
+<details>
+  <summary>Consultar atributos y setters de la implementación real</summary>
+  <Code code={source} lang="ts" />
+</details>
+
+Una mutación interna del atributo también puede producir una reacción. El guard limita esa cadena: cambiar la propiedad no debe reescribir indefinidamente el mismo texto. Además, la actualización programática no emite `tab-change`: recepción de entradas y notificación de acciones son responsabilidades diferentes.
+
+## Native vs Lit y errores frecuentes
+
+Lit configura observación, conversión y reflexión de `selected` con `@property`. `items` declara `attribute: false`. Esto no decide qué ID es válido; ambos componentes usan la misma normalización del dominio. La reflexión y la vista Lit terminan en su actualización asíncrona.
+
+No hagas del atributo un almacén de objetos privados. No conviertas `hasAttribute` en una comparación con `"true"`. No confundas `disabled` del host con el atributo de cada botón interno: el componente los relaciona mediante su implementación, el navegador no lo hace por el nombre de una etiqueta nueva.
+
+## Resumen y entrevista
+
+Usa atributos para una API textual pequeña, documenta valores por defecto y refleja solo cuando aporta valor. **Entrevista:** ¿por qué eliminar selected vuelve a intro? Porque el contrato normaliza la ausencia a la primera pestaña habilitada, no porque esa sea una regla universal de Custom Elements.
+
+## Referencias oficiales
+
+- [DOM: atributos](https://dom.spec.whatwg.org/#attributes).
+- [HTML: atributos booleanos](https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#boolean-attributes).
+- [Lit: atributos observados y reflexión](https://lit.dev/docs/components/properties/).
+
+<Progress lessonId="dom-attributes" />
+
+<Navigation current="03-attributes" end />

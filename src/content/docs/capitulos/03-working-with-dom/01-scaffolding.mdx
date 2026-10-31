@@ -1,0 +1,95 @@
+---
+title: 'Scaffolding a Tabs Component'
+description: 'DOM y contratos de Tabs: Scaffolding a Tabs Component, código real y decisiones de ingeniería.'
+sidebar:
+  order: 1
+---
+
+import Navigation from '../../../../components/dom/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/dom/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/dom/tabs-consumer.ts?raw';
+import diagram from '../../../../../diagrams/dom-scaffold.mmd?raw';
+
+<Navigation current="01-scaffolding" />
+
+## Introducción y objetivos
+
+Un sistema de pestañas organiza secciones relacionadas sin obligar al usuario a leerlas simultáneamente. No es una navegación entre páginas ni una fila de botones con un color distinto. Su contrato incluye selección, foco, relaciones semánticas y comportamiento cuando cambian los datos.
+
+Al terminar podrás definir ese contrato antes de escribir el render. Compararás dos implementaciones del mismo comportamiento: `lab-native-tabs` y `lab-lit-tabs`. Los ejemplos finales están disponibles desde el principio; las lecciones explican sus decisiones por capas, sin introducir una jerarquía de clases ni un framework de widgets.
+
+## El contrato mínimo
+
+| Entrada o salida    | Tipo y política                                                     |
+| ------------------- | ------------------------------------------------------------------- |
+| `items`             | Propiedad con array de `{ id, label, disabled? }`; no atributo JSON |
+| `selected`          | ID estable de pestaña; propiedad y atributo reflejado               |
+| `disabled`          | Booleano por presencia; bloquea interacción con tabs                |
+| `label`             | Nombre accesible del tablist; propiedad y atributo                  |
+| `before-tab-change` | Intención de usuario cancelable, con anterior, destino y origen     |
+| `tab-change`        | Cambio confirmado de usuario, no cancelable                         |
+| Contenido           | Nodos Light DOM asignados a slots cuyo nombre coincide con cada ID  |
+
+La selección se expresa con IDs, no con posiciones. Si insertas una pestaña al principio, la selección existente no debe pasar accidentalmente a otra sección. Los IDs de `items` son únicos por instancia, en kebab-case y no vacíos; una configuración inválida lanza `TypeError` sin sustituir la anterior.
+
+<Diagram
+  source={diagram}
+  caption="Los datos identifican pestañas; el consumidor conserva el contenido y recibe un contrato de eventos mínimo."
+/>
+
+## Funcionamiento y estructura
+
+El host recibe la configuración y contiene los paneles del consumidor. Su raíz shadow contiene el tablist, los botones y los contenedores `tabpanel`. Cada contenedor incluye un slot nombrado. `aria-controls` y `aria-labelledby` enlazan elementos de la misma raíz; no dependemos de que IDs de árboles diferentes se resuelvan como si fueran uno solo.
+
+```html
+<lab-native-tabs label="Documentación">
+  <section slot="intro"><p>Introducción del consumidor.</p></section>
+  <section slot="contract"><p>Contrato público.</p></section>
+</lab-native-tabs>
+```
+
+El HTML aporta contenido; un módulo de navegador importa el registro y asigna `items`. El archivo consumidor real recibe un elemento que ya cumple la interfaz `TabsAPI`, configura los metadatos y devuelve una función de limpieza para su listener. Esa interfaz no registra la clase ni valida por sí sola datos de un evento en ejecución.
+
+<Code code={source} lang="ts" />
+
+## Proyecto ejecutable
+
+<Demo kind="tabs">
+  <p>
+    Compara ambos componentes. Añade un panel, deshabilita Contrato y vacía la
+    lista. Inspeccionar árboles consulta objetos reales: la búsqueda en el host
+    ve contenido Light DOM; la búsqueda en shadowRoot encuentra los botones
+    internos.
+  </p>
+</Demo>
+
+## Accesibilidad desde el diseño
+
+Elegimos **activación manual**. Las flechas, Home y End mueven el foco entre pestañas habilitadas; Enter y Espacio activan la enfocada. Un clic también activa. Solo una pestaña habilitada participa en la secuencia Tab mediante `tabindex="0"`; las demás usan `-1`. Cada panel visible puede recibir foco para facilitar el acceso a su contenido.
+
+La [guía WAI-ARIA Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/) describe el patrón. La activación automática puede ser adecuada cuando el panel aparece inmediatamente; no debe convertir cada flecha en una espera. Aquí mantenemos el modo manual para estudiar explícitamente la diferencia entre foco y selección, incluso con contenido local inmediato.
+
+## Native vs Lit y buenas prácticas
+
+La versión nativa crea nodos y actualiza atributos de estado. Lit declara botones y paneles en templates reactivos. Comparten tipos, validación, navegación y protocolo de eventos, pero conservan sus propios mecanismos de render. Ninguna versión edita los nodos que pertenecen al consumidor.
+
+Empieza con el contrato observable y añade complejidad solo si un caso la requiere. No hagas que el estudiante necesite un controller genérico para entender tres botones. Tampoco publiques índices internos o referencias DOM en los eventos si basta un ID.
+
+## Errores frecuentes, resumen y entrevista
+
+Un `role="tab"` aislado no implementa teclado ni selección. Un botón seleccionado no debería seguir apuntando a un panel ya retirado. Los ejemplos del capítulo prueban ambos lados de la relación.
+
+**Resumen:** Tabs combina datos, contenido, estado e interacción. **Entrevista:** ¿por qué usar un ID y no el índice como API de selección? Porque la identidad debe sobrevivir a inserciones y reordenamientos.
+
+## Referencias oficiales
+
+- [WAI-ARIA APG: Tabs](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/).
+- [HTML: Custom Elements](https://html.spec.whatwg.org/multipage/custom-elements.html).
+- [Lit: componentes](https://lit.dev/docs/components/overview/).
+
+<Progress lessonId="dom-scaffold" />
+
+<Navigation current="01-scaffolding" end />

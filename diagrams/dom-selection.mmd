@@ -1,0 +1,10 @@
+flowchart TD
+  A[Flechas Home End] --> F[Mover foco]
+  F --> K[Enter o Espacio]
+  P[Clic] --> I[Intención cancelable]
+  K --> I
+  I --> C{Aceptada}
+  C -->|Sí| S[Actualizar selected]
+  S --> E[Emitir tab-change]
+  C -->|No| M[Conservar selección]
+  J[Asignación JavaScript] --> Q[Actualizar selected sin notificar]

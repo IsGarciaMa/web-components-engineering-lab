@@ -1,0 +1,88 @@
+---
+title: 'Managing Selection'
+description: 'DOM y contratos de Tabs: Managing Selection, código real y decisiones de ingeniería.'
+sidebar:
+  order: 6
+---
+
+import Navigation from '../../../../components/dom/lesson-navigation.astro';
+import Progress from '../../../../components/progress/learning-progress.astro';
+import Demo from '../../../../components/dom/demo.astro';
+import Diagram from '../../../../components/Diagram.astro';
+import { Code } from '@astrojs/starlight/components';
+import source from '../../../../examples/dom/tabs-consumer.ts?raw';
+import diagram from '../../../../../diagrams/dom-selection.mmd?raw';
+
+<Navigation current="06-selection" />
+
+## Introducción y objetivos
+
+La selección responde «qué panel está activo». El foco responde «dónde actuará el teclado». Confundirlos obliga a activar contenido al explorar opciones o deja la navegación en una pestaña que no corresponde con lo que se anuncia.
+
+Aprenderás a implementar activación manual, roving tabindex y sincronización externa sin ciclos. También distinguirás un cambio normalizado por datos nuevos de una intención explícita del usuario.
+
+## Estado público y foco privado
+
+`selected` es el ID público de la pestaña activa. El componente mantiene aparte el ID enfocado para decidir el punto de entrada por Tab. Al mover con flechas, actualiza foco y tabindex, pero mantiene `aria-selected` y el panel visible hasta activar. La señal visual de selección usa borde y peso; el foco conserva su outline independiente.
+
+<Diagram
+  source={diagram}
+  caption="Mover foco no confirma selección; solo la activación aceptada actualiza el estado público y notifica."
+/>
+
+| Acción                                    | Foco                               | Selección           | Evento público de cambio |
+| ----------------------------------------- | ---------------------------------- | ------------------- | ------------------------ |
+| Flechas / Home / End                      | Cambia entre habilitadas           | Conserva            | Ninguno                  |
+| Enter / Espacio                           | Conserva la pestaña enfocada       | Cambia si se acepta | Uno                      |
+| Clic en pestaña habilitada                | Comportamiento de foco del control | Cambia si se acepta | Uno                      |
+| `selected = id`                           | No roba foco exterior              | Normaliza y cambia  | Ninguno                  |
+| Retirar/deshabilitar un item seleccionado | Recupera si se pierde              | Primera habilitada  | Ninguno                  |
+
+## Laboratorio de sincronización
+
+<Demo kind="seleccion">
+  <p>
+    Enfoca una pestaña y usa flechas antes de confirmar. Con sincronización
+    activa, una selección de usuario en una vista escribe selected en la otra.
+    Cancelar before-tab-change bloquea la intención; seleccionar desde
+    JavaScript sigue siendo una entrada programática silenciosa.
+  </p>
+</Demo>
+
+<Code code={source} lang="ts" />
+
+La sincronización unidireccional tiene una fuente externa que escribe la propiedad. La demo también permite un puente en ambas direcciones: escucha un cambio de usuario y escribe en la otra instancia. No es un binding mágico del navegador. Funciona sin bucle porque el setter no vuelve a publicar `tab-change`. El registro identifica el origen y conserva ocho entradas.
+
+## Navegación accesible
+
+La lista es horizontal y tiene nombre accesible. ArrowRight y ArrowLeft recorren las habilitadas con vuelta al extremo; la dirección visual se invierte en RTL. Home enfoca la primera y End la última. ArrowUp y ArrowDown no se interceptan en esta orientación para conservar el scroll de la página.
+
+Enter y Espacio previenen la acción nativa duplicada al confirmar, de modo que una activación no provoque dos eventos. Las pestañas deshabilitadas usan `disabled` en botones nativos y quedan fuera del recorrido. Si el host está disabled, ningún tab entra por Tab, pero el panel seleccionado se conserva y puede seguir conteniendo contenido útil.
+
+El panel activo es el único sin `hidden`; los otros no deben seguir siendo navegables. Cada botón enlaza a su contenedor interno con `aria-controls`, y este vuelve al botón con `aria-labelledby`. Los nombres de slot no sustituyen esos identificadores ARIA.
+
+## Confirmación y cambios concurrentes
+
+Antes de confirmar, el componente despacha la intención. Si se cancela, mantiene la selección. También vuelve a comprobar que el ID sigue habilitado y que un listener no haya cambiado `selected` durante esa notificación. Así evita sobrescribir una decisión externa tomada dentro del mismo dispatch.
+
+Después de confirmar emite el hecho. Asignaciones externas, normalización por nueva colección y restauración inicial no generan una falsa interacción. No publiques `source: 'keyboard'` al recibir una propiedad solo para que el consumidor reaccione: estaría inventando el origen.
+
+## Native vs Lit y errores frecuentes
+
+Nativo modifica estados ARIA, hidden y tabindex explícitamente. Lit los deriva del estado en templates y actualiza de forma asíncrona. Ambos usan la misma función de navegación y protocolo. Las pruebas esperan `updateComplete` donde corresponde y comprueban el mismo comportamiento observable.
+
+No hagas que todas las pestañas tengan `tabindex="0"`; el widget compuesto tendría demasiadas paradas. Tampoco muevas foco fuera del control por cada escritura programática. Solo se recupera cuando un nodo propio pierde validez, desaparece o queda dentro de un panel que se oculta.
+
+## Resumen y entrevista
+
+Foco, selección y notificación son estados relacionados, pero no intercambiables. **Entrevista:** ¿por qué un puente bidireccional entre dos Tabs no necesita un flag global anti-bucle? Porque las escrituras del consumidor son silenciosas; solo las acciones aceptadas publican cambios.
+
+## Referencias oficiales
+
+- [WAI-ARIA APG: activación manual](https://www.w3.org/WAI/ARIA/apg/patterns/tabs/examples/tabs-manual/).
+- [WAI-ARIA: aria-selected](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
+- [HTML: foco](https://html.spec.whatwg.org/multipage/interaction.html#focus).
+
+<Progress lessonId="dom-selection" />
+
+<Navigation current="06-selection" end />

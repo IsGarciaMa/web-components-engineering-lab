@@ -12,7 +12,7 @@ Web Components Engineering Lab propone entender qué aporta el navegador y qué 
 3. Compara las implementaciones en [el laboratorio](/laboratorios/contador/): vista funcional, código fuente y eventos.
 4. Resuelve [el ejercicio](/ejercicios/contador/) y repasa [la presentación](/slides/foundation.html).
 
-El capítulo [Using Web Components](/capitulos/01-using-web-components/) está publicado con siete lecciones. También está publicado [Defining Web Components](/capitulos/02-defining-web-components/) con nueve lecciones, ocho laboratorios y tres ejercicios. Los otros nueve capítulos siguen pendientes. La lección de PR-00 conserva su papel de introducción. Cada capítulo se desarrolla en una PR propia.
+El capítulo [Using Web Components](/capitulos/01-using-web-components/) está publicado con siete lecciones. También está publicado [Defining Web Components](/capitulos/02-defining-web-components/) con nueve lecciones, ocho laboratorios y tres ejercicios. También está publicado [Working with the DOM](/capitulos/03-working-with-dom/) con ocho lecciones y Tabs accesibles. Los otros ocho capítulos siguen pendientes. La lección de PR-00 conserva su papel de introducción. Cada capítulo se desarrolla en una PR propia.
 
 ## Ejecutar en local
 

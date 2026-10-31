@@ -1,0 +1,7 @@
+flowchart LR
+  A[setAttribute selected] --> C[attributeChangedCallback]
+  C --> S[Setter del contrato]
+  S --> N[Normalizar ID]
+  N --> V[Actualizar vista]
+  N --> G{Texto diferente}
+  G -->|Sí| A

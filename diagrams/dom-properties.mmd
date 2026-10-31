@@ -1,0 +1,7 @@
+flowchart TD
+  C[Consumidor JS] --> P[Propiedad items]
+  P --> V[Validar y copiar]
+  V --> S[Resolver selected]
+  S --> N[Nativo sincroniza nodos]
+  S --> L[Lit solicita actualización]
+  L --> R[Template reactivo]
